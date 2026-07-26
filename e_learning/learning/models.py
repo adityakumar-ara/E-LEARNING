@@ -1,17 +1,24 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
-from django.conf import settings
 # Create your models here.
 class CustomeUser(AbstractUser):
-    CHOOSE_GENDER=(
-        ('male',('MALE')),
-        ('female',('FEMALE')),
-        ('other',('other')),
-    )
+    class Gender(models.TextChoices):
+        MALE = 'male', 'Male'
+        FEMALE = 'female', 'Female'
+        OTHER = 'other', 'Other'
+
     full_name = models.CharField(max_length=100)
     email = models.EmailField(unique=True)
-    phone = models.CharField(max_length=10, unique=True)
-    dob = models.DateTimeField(max_length=10 , null=True, blank=True)
+    phone = models.CharField(max_length=15, unique=True)
+    dob = models.DateField(null=True, blank=True)
+    gender = models.CharField(max_length=10, choices=Gender.choices, null=True, blank=True)
     profile_image = models.ImageField(upload_to='profile_image/', null=True, blank=True)
+
     def __str__(self):
         return self.email
+    
+class ELVideo(models.Model):
+    video = models.FileField(upload_to="ELvideo/",null=True, blank=True)    
+    alt = models.CharField(max_length=20, null=True, blank=True)
+    def __str__(self):
+        return self.alt
