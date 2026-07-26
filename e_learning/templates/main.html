@@ -6,7 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>E-Learning Platform</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+  
+    {% block extra_css %}{% endblock %}
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
@@ -72,6 +73,51 @@
 
         {% block content %}{% endblock content %}
     </main>
+
+    <footer class="bg-dark text-white pt-5 pb-4 mt-4">
+        <div class="container text-center text-md-start">
+            <div class="row text-center text-md-start">
+
+                <div class="col-md-3 col-lg-3 col-xl-3 mx-auto mt-3">
+                    <h5 class="text-uppercase mb-4 fw-bold">E-Learning</h5>
+                    <p>
+                        Your journey to knowledge starts here. Empowering students with the skills for tomorrow.
+                    </p>
+                </div>
+
+                <div class="col-md-2 col-lg-2 col-xl-2 mx-auto mt-3">
+                    <h5 class="text-uppercase mb-4 fw-bold">Quick links</h5>
+                    <p><a href="#" class="text-white" style="text-decoration: none;">About</a></p>
+                    <p><a href="#" class="text-white" style="text-decoration: none;">Courses</a></p>
+                    <p><a href="#" class="text-white" style="text-decoration: none;">Live Classes</a></p>
+                    <p><a href="#" class="text-white" style="text-decoration: none;">Campus To Corporate</a></p>
+                </div>
+
+                <div class="col-md-3 col-lg-2 col-xl-2 mx-auto mt-3">
+                    <h5 class="text-uppercase mb-4 fw-bold">Programs</h5>
+                    <p><a href="#" class="text-white" style="text-decoration: none;">Leadership Development</a></p>
+                    <p><a href="#" class="text-white" style="text-decoration: none;">Communication Skill</a></p>
+                    <p><a href="#" class="text-white" style="text-decoration: none;">Personality Development</a></p>
+                    <p><a href="#" class="text-white" style="text-decoration: none;">Campus To Corporate</a></p>
+                </div>
+
+                <div class="col-md-4 col-lg-3 col-xl-3 mx-auto mt-3">
+                    <h5 class="text-uppercase mb-4 fw-bold">Contact</h5>
+                    <p>Mobile Number: +01 234 567 88</p>
+                    <p>Email: info@example.com</p>
+                    <p>Location: New York, NY 10012, US</p>
+                </div>
+            </div>
+
+            <hr class="mb-4">
+
+            <div class="text-center">
+                <p> © 2026 Copyright:
+                    <a href="{% url 'home' %}" style="text-decoration: none;" class="text-white"><strong>E-Learning</strong></a>
+                </p>
+            </div>
+        </div>
+    </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>

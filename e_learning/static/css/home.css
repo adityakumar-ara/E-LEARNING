@@ -1,0 +1,46 @@
+*{
+    margin: 0;padding: 0;
+}
+.hero-section {
+    position: relative;
+    overflow: hidden; /* Ensures video doesn't spill out from rounded corners */
+    color: white;
+}
+
+.hero-video {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: -1;
+}
+
+.hero-overlay {
+    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent overlay for text readability */
+}
+.patti-container{
+    height: 200%;
+    width: 100%;
+}
+.todo{
+    width: 100%;
+    height: 500px;
+}
+.floating-quote-box{
+    bottom: 150px;
+    color: white;
+
+}
+.floating-quote-box p:nth-child(10){
+    font-size: 20px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin-bottom: 50px;
+   
+}
+.floating-quote-box p:nth-child(9){
+    font-size: 15px;
+    letter-spacing :3px;
+   
+}
