@@ -22,3 +22,9 @@ class ELVideo(models.Model):
     alt = models.CharField(max_length=20, null=True, blank=True)
     def __str__(self):
         return self.alt
+    
+class Feature_Courses(models.model):
+    course_name = models.CharField(max_length=100, null=True, blank=True)   
+    about_course = models.TextField()
+    course_image = models.ImageField(upload_to='feartur_course/', null=True, blank=True)
+    
