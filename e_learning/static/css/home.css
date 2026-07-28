@@ -1,9 +1,12 @@
-*{
-    margin: 0;padding: 0;
+* {
+    margin: 0;
+    padding: 0;
 }
+
 .hero-section {
     position: relative;
-    overflow: hidden; /* Ensures video doesn't spill out from rounded corners */
+    overflow: hidden;
+    /* Ensures video doesn't spill out from rounded corners */
     color: white;
 }
 
@@ -18,35 +21,45 @@
 }
 
 .hero-overlay {
-    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent overlay for text readability */
+    background-color: rgba(0, 0, 0, 0.5);
+    /* Semi-transparent overlay for text readability */
 }
-.patti-container{
+
+.patti-container {
     background-image: url(../assest/horizebtal_patti.jpg);
-    background-size: cover;       /* Cover the entire screen */
-    background-repeat: no-repeat; /* Prevent repeating */
-    background-position: center;  /* Center the image */
-    background-attachment: fixed; /* Optional: fixed while scrolling */
-    border-radius:10px ;
+    background-size: cover;
+    /* Cover the entire screen */
+    background-repeat: no-repeat;
+    /* Prevent repeating */
+    background-position: center;
+    /* Center the image */
+    background-attachment: fixed;
+    /* Optional: fixed while scrolling */
+    border-radius: 10px;
 }
-.todo{
+
+.todo {
     width: 100%;
     height: 500px;
 }
-.floating-quote-box{
+
+.floating-quote-box {
     bottom: 150px;
     color: white;
 
 }
-.floating-quote-box p:nth-child(10){
+
+.floating-quote-box p:nth-child(10) {
     font-size: 20px;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     margin-bottom: 50px;
-   
+
 }
-.floating-quote-box p:nth-child(9){
+
+.floating-quote-box p:nth-child(9) {
     font-size: 15px;
-    letter-spacing :3px;
-   
+    letter-spacing: 3px;
+
 }
 
 
@@ -97,3 +110,38 @@
     fill: currentColor;
 }
 
+
+
+.recognized-inner {
+    background-color: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    align-items: center;
+}
+
+.recognized-label {
+    font-size: 0.75rem;
+    letter-spacing: 0.22em;
+    color: #6c757d;
+    font-weight: 600;
+}
+
+.recognized-text {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #212529;
+}
+
+.recognized-link {
+    color: #b22222;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.recognized-link:hover {
+    text-decoration: underline;
+}
+.libertinus-serif-bold-italic {
+  font-family: "Libertinus Serif", serif;
+  font-weight: 700;
+  font-style: italic;
+}
