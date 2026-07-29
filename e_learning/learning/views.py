@@ -7,6 +7,7 @@ from django.contrib import messages
 from django.core.mail import send_mail
 from django.conf import settings
 import random
+from django.db.models import Count, Avg
 from django import forms
 from .models import *
 
@@ -83,7 +84,7 @@ def login_view(request):
     else:
         form = LoginForm()
         
-    return render(request, 'registration/login.html', {'form': form})
+    return render(request, 'login.html', {'form': form})
 
 def logout_view(request):
     logout(request)
@@ -153,15 +154,31 @@ def verify_otp(request):
     return render(request, 'registration/verify_otp.html', {'form': form})
 
 def course_view(request):
-    courses = Courses.objects.all()
+    query = request.GET.get('q', '')
+    courses_list = Courses.objects.annotate(
+        enrollment_count=Count('enrollments'),
+        average_rating=Avg('reviews__rating')
+    ).select_related('instructor').order_by('-is_featured', 'course_name')
+
+    if query:
+        courses_list = courses_list.filter(course_name__icontains=query)
+
     context = {
-        'courses':courses,
+        'courses': courses_list,
+        'search_query': query,
     }
-    return render(request, 'couses_views.html', context)
+    return render(request, 'courses_list.html', context)
 
 def course_detail(request, course_id):
     course = get_object_or_404(Courses, pk=course_id)
+    schedules = course.class_schedules.all()
+    is_enrolled = False
+    if request.user.is_authenticated:
+        is_enrolled = Enrollment.objects.filter(user=request.user, course=course).exists()
+
     context = {
-        'course': course
+        'course': course,
+        'is_enrolled': is_enrolled,
+        'schedules': schedules,
     }
     return render(request, 'course_detail.html', context)
