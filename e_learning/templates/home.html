@@ -162,6 +162,24 @@
   <div class="feauture-programs-section py-5 libertinus-serif-bold-italic ">
     <h6 class="text-uppercase text-warning text-center" style="letter-spacing: 0.20rem;">Our Programs</h6>
     <h2 class="text-center fw-semibold">Featured Courses</h2>
+    <div class="row row-cols-1 row-cols-md-3 g-4 mt-4">
+            {% for course in feature_courses %}
+            <div class="col">
+              <a href="{% url 'course_detail' course.id %}" class="text-decoration-none text-dark">
+                <div class="card h-100 shadow-sm">
+                  {% if course.course_image %}
+                  <img src="{{ course.course_image.url }}" class="card-img-top" alt="{{ course.course_name }}">
+                  {% endif %}
+                  <div class="card-body">
+                    <h5 class="card-title">{{ course.course_name }}</h5>
+                    <h5 class="card-title mark">${{ course.price }}</h5>
+                    <p class="card-text text-muted">{{ course.about_course|truncatewords:15 }}</p>
+                  </div>
+                </div>
+              </a>
+            </div>
+            {% endfor %}
+    </div>
   </div>
 
 {% endblock content %}
