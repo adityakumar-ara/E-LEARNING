@@ -21,3 +21,9 @@ admin.site.register(CustomeUser, CustomeUserAdmin)
 @admin.register(ELVideo)
 class ELvideoAdmin(admin.ModelAdmin):
     list_display = ('id', 'video', 'alt')
+    
+@admin.register(Courses)    
+class CoursesAdmin(admin.ModelAdmin)  :
+    list_display = ('course_name', 'price', 'is_featured', 'duration', 'starting_time')
+    list_filter = ('is_featured', 'starting_time')
+    search_fields = ('course_name', 'about_course')

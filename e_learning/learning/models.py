@@ -23,8 +23,15 @@ class ELVideo(models.Model):
     def __str__(self):
         return self.alt
     
-class Feature_Courses(models.model):
-    course_name = models.CharField(max_length=100, null=True, blank=True)   
+class Courses(models.Model):
+    course_name = models.CharField(max_length=200)
     about_course = models.TextField()
-    course_image = models.ImageField(upload_to='feartur_course/', null=True, blank=True)
+    course_image = models.ImageField(upload_to='feature_course/', null=True, blank=True)
+    starting_time = models.DateTimeField(null=True, blank=True)
+    duration = models.CharField(max_length=100, help_text="e.g., '3 Months', '30 Hours'")
+    is_featured = models.BooleanField(default=False)
+    price = models.DecimalField(max_digits=8, decimal_places=2, null=True, blank=True, help_text="Enter price in USD. Leave blank for free courses.")
+
+    def __str__(self):
+        return self.course_name
     

@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 
 # Create your views here.
 from django.shortcuts import redirect
@@ -12,8 +12,11 @@ from .models import *
 
 def home(request):
     videos = ELVideo.objects.all()
+    featured_courses = Courses.objects.filter(is_featured=True)
+
     context = {
         'videos': videos,
+        'feature_courses' : featured_courses,
     }
     return render(request, 'home.html', context)
 
@@ -148,3 +151,17 @@ def verify_otp(request):
         form = OTPVerificationForm()
     
     return render(request, 'registration/verify_otp.html', {'form': form})
+
+def course_view(request):
+    courses = Courses.objects.all()
+    context = {
+        'courses':courses,
+    }
+    return render(request, 'couses_views.html', context)
+
+def course_detail(request, course_id):
+    course = get_object_or_404(Courses, pk=course_id)
+    context = {
+        'course': course
+    }
+    return render(request, 'course_detail.html', context)
