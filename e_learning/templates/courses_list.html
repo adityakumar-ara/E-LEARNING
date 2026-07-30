@@ -1,6 +1,6 @@
 {% extends 'main.html' %}
 
-{% block content %}
+{% block content %} 
 <div class="container py-5">
     <div class="text-center mb-5">
         <h1 class="fw-bold">Explore Our Courses</h1>
@@ -23,7 +23,7 @@
     <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
         {% for course in courses %}
         <div class="col">
-            <div class="card h-100 shadow-sm">
+            <div class="card h-100">
                 {% if course.course_image %}
                 <img src="{{ course.course_image.url }}" class="card-img-top" alt="{{ course.course_name }}" style="height: 200px; object-fit: cover;">
                 {% endif %}
@@ -40,7 +40,7 @@
 
                     <div class="mt-auto">
                         <div class="d-flex justify-content-between align-items-center mb-3">
-                            <div class="fw-bold fs-5 text-primary">
+                            <div class="fw-bold fs-5 text-primary-emphasis">
                                 {% if course.discount_price %}
                                     ${{ course.discount_price }} <del class="text-muted fs-6">${{ course.price }}</del>
                                 {% elif course.price > 0 %}
@@ -55,12 +55,7 @@
                             </div>
                             {% endif %}
                         </div>
-                        <div class="d-grid gap-2 d-md-flex justify-content-md-start">
-                            {% if user.is_athunticated %}
-                            <a href="#" class="btn btn-primary">Enroll Now</a>
-                            {% else %}
-                            <a href="{% url 'register' %}" class="btn btn-primary">Register To Enroll</a>
-                            {% endif %}
+                        <div class="d-grid gap-2">
                             <a href="{% url 'course_detail' course.id %}" class="btn btn-outline-secondary">View Course</a>
                         </div>
                     </div>

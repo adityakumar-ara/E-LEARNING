@@ -1,4 +1,4 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 
 # Create your views here.
 from django.shortcuts import redirect
@@ -6,18 +6,24 @@ from django.contrib.auth import login, authenticate, logout
 from django.contrib import messages
 from django.core.mail import send_mail
 from django.conf import settings
+from django.utils import timezone
 import random
 from django.db.models import Count, Avg
 from django import forms
+from django.utils import timezone
 from .models import *
 
 def home(request):
     videos = ELVideo.objects.all()
     featured_courses = Courses.objects.filter(is_featured=True)
+    upcoming_classes = ClassSchedule.objects.select_related('course').filter(
+        start_time__gte=timezone.now()
+    ).order_by('start_time')[:3]
 
     context = {
         'videos': videos,
         'feature_courses' : featured_courses,
+        'upcoming_classes': upcoming_classes,
     }
     return render(request, 'home.html', context)
 
@@ -170,15 +176,23 @@ def course_view(request):
     return render(request, 'courses_list.html', context)
 
 def course_detail(request, course_id):
-    course = get_object_or_404(Courses, pk=course_id)
-    schedules = course.class_schedules.all()
+    """
+    Displays the details for a specific course, including upcoming live classes.
+    """
+    course = get_object_or_404(Courses, id=course_id)
     is_enrolled = False
     if request.user.is_authenticated:
         is_enrolled = Enrollment.objects.filter(user=request.user, course=course).exists()
 
+    # Get live and upcoming schedules
+    now = timezone.now()
+    live_schedules = course.class_schedules.filter(start_time__lte=now, end_time__gte=now).order_by('start_time')
+    upcoming_schedules = course.class_schedules.filter(start_time__gt=now).order_by('start_time')
+
     context = {
         'course': course,
         'is_enrolled': is_enrolled,
-        'schedules': schedules,
+        'live_schedules': live_schedules,
+        'upcoming_schedules': upcoming_schedules,
     }
     return render(request, 'course_detail.html', context)

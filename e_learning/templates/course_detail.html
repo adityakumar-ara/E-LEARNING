@@ -1,24 +1,39 @@
 {% extends 'main.html' %}
 
 {% block extra_css %}
-<style>
-    .sticky-top-card {
-        top: 80px; /* Adjust this value based on your navbar height */
-    }
-</style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 {% endblock %}
 
 {% block content %}
-<!-- Course Header -->
-<div class="bg-light py-5">
+<div class="course-detail-hero py-5">
     <div class="container">
-        <h1 class="display-5 fw-bold">{{ course.course_name }}</h1>
-        <p class="fs-5 text-muted">{{ course.about_course|truncatewords:30 }}</p>
-        <div class="d-flex gap-4 mt-3">
-            <span class="text-muted"><i class="bi bi-clock"></i> Duration: {{ course.duration }}</span>
-            {% if course.starting_time %}
-            <span class="text-muted"><i class="bi bi-calendar-event"></i> Course Starts: {{ course.starting_time|date:"F d, Y, g:i A" }}</span>
-            {% endif %}
+        <div class="row align-items-center g-4">
+            <div class="col-lg-8">
+                <span class="course-pill">Featured Course</span>
+                <h1 class="display-5 fw-bold mb-3">{{ course.course_name }}</h1>
+                <p class="fs-5 mb-4">{{ course.about_course|truncatewords:30 }}</p>
+                <div class="course-meta d-flex flex-wrap gap-3">
+                    <span><i class="bi bi-clock"></i> Duration: {{ course.duration }}</span>
+                    {% if course.starting_time %}
+                    <span><i class="bi bi-calendar-event"></i> Starts: {{ course.starting_time|date:"F d, Y, g:i A" }}</span>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="course-highlight-card">
+                    <h4 class="fw-bold mb-2">Ready to begin?</h4>
+                    <p class="mb-3">Join live sessions and learn with expert guidance.</p>
+                    {% if user.is_authenticated %}
+                        {% if is_enrolled %}
+                            <a href="#" class="btn btn-success btn-lg w-100 disabled">You are Enrolled</a>
+                        {% else %}
+                            <a href="#" class="btn btn-theme btn-lg w-100">Enroll Now</a>
+                        {% endif %}
+                    {% else %}
+                        <a href="{% url 'login' %}?next={{ request.path }}" class="btn btn-theme btn-lg w-100">Sign in to Enroll</a>
+                    {% endif %}
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -29,7 +44,7 @@
         <!-- Left Column: Course Details -->
         <div class="col-lg-8">
             <!-- Tab Navigation -->
-            <ul class="nav nav-tabs nav-fill mb-4" id="courseTab" role="tablist">
+            <ul class="nav nav-tabs nav-fill mb-4 course-tabs" id="courseTab" role="tablist">
                 <li class="nav-item" role="presentation">
                     <button class="nav-link active" id="overview-tab" data-bs-toggle="tab" data-bs-target="#overview" type="button" role="tab" aria-controls="overview" aria-selected="true">Overview</button>
                 </li>
@@ -52,21 +67,47 @@
                 </div>
                 <!-- Live Classes Tab -->
                 <div class="tab-pane fade" id="live-classes" role="tabpanel" aria-labelledby="live-classes-tab">
-                    <h3 class="fw-semibold mb-3">Upcoming Live Classes</h3>
-                    {% for schedule in schedules %}
-                        <div class="card mb-3">
+                    
+                    <!-- Live Now Section -->
+                    {% if live_schedules %}
+                    <h3 class="fw-semibold mb-3 text-danger"><i class="bi bi-broadcast"></i> Live Now</h3>
+                    {% for schedule in live_schedules %}
+                        <div class="course-schedule-card mb-3">
                             <div class="card-body">
                                 <h5 class="card-title">{{ schedule.title }}</h5>
                                 <p class="card-text text-muted">{{ schedule.start_time|date:"l, F j, Y" }} at {{ schedule.start_time|time:"g:i A" }} - {{ schedule.end_time|time:"g:i A" }}</p>
                                 {% if is_enrolled %}
-                                    <a href="{{ schedule.meeting_link }}" class="btn btn-success" target="_blank">Join Class</a>
+                                    <a href="{{ schedule.meeting_link }}" class="btn btn-danger" target="_blank"><i class="bi bi-camera-video-fill"></i> Join Live Class</a>
                                 {% else %}
-                                    <button class="btn btn-secondary" disabled>Enroll to Join</button>
+                                    <button class="btn btn-outline-secondary" disabled>Enroll to Join</button>
                                 {% endif %}
                             </div>
                         </div>
                     {% empty %}
-                        <p>No live classes have been scheduled for this course yet.</p>
+                        <!-- No message needed if nothing is live -->
+                    {% endfor %}
+                    <hr class="my-4">
+                    {% endif %}
+
+                    <!-- Upcoming Classes Section -->
+                    <h3 class="fw-semibold mb-3">Upcoming Classes</h3>
+                    {% for schedule in upcoming_schedules %}
+                        <div class="course-schedule-card mb-3">
+                            <div class="card-body">
+                                <h5 class="card-title">{{ schedule.title }}</h5>
+                                <p class="card-text text-muted">
+                                    <i class="bi bi-calendar-event"></i> {{ schedule.start_time|date:"l, F j, Y" }}<br>
+                                    <i class="bi bi-clock"></i> {{ schedule.start_time|time:"g:i A" }} - {{ schedule.end_time|time:"g:i A" }}
+                                </p>
+                                {% if is_enrolled %}
+                                    <button class="btn btn-primary" disabled>Starts Soon</button>
+                                {% else %}
+                                    <button class="btn btn-outline-secondary" disabled>Enroll to Join</button>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% empty %}
+                        <p>No new classes have been scheduled for this course yet.</p>
                     {% endfor %}
                 </div>
                 <!-- Reviews Tab -->
@@ -79,13 +120,12 @@
 
         <!-- Right Column: Enrollment Card -->
         <div class="col-lg-4">
-            <div class="card shadow-sm sticky-top sticky-top-card">
                 {% if course.course_image %}
                 <img src="{{ course.course_image.url }}" class="card-img-top" alt="{{ course.course_name }}">
                 {% endif %}
                 <div class="card-body p-4">
                     <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h3 class="fw-bold text-primary">
+                        <h3 class="fw-bold price-tag">
                             {% if course.price > 0 %}
                                 ${{ course.price }}
                             {% else %}
@@ -98,10 +138,10 @@
                             {% if is_enrolled %}
                                 <a href="#" class="btn btn-success btn-lg disabled">You are Enrolled</a>
                             {% else %}
-                                <a href="#" class="btn btn-primary btn-lg">Enroll Now</a>
+                                <a href="#" class="btn btn-theme btn-lg">Enroll Now</a>
                             {% endif %}
                         {% else %}
-                            <a href="{% url 'login' %}?next={{ request.path }}"  class="btn btn-primary btn-lg">Sign in to Enroll</a>
+                            <a href="{% url 'login' %}?next={{ request.path }}" class="btn btn-theme btn-lg">Sign in to Enroll</a>
                         {% endif %}
                     </div>
                 </div>

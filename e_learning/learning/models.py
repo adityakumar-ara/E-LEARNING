@@ -65,6 +65,7 @@ class Review(models.Model):
 class ClassSchedule(models.Model):
     course = models.ForeignKey(Courses, on_delete=models.CASCADE, related_name='class_schedules')
     title = models.CharField(max_length=200, help_text="e.g., 'Week 1: Introduction'")
+    description = models.TextField(blank=True, null=True, help_text="A brief description of what will be covered in the class.")
     start_time = models.DateTimeField()
     end_time = models.DateTimeField()
     meeting_link = models.URLField(blank=True, null=True, help_text="Link to the live class (e.g., Zoom, Google Meet)")
@@ -74,3 +75,17 @@ class ClassSchedule(models.Model):
 
     def __str__(self):
         return f"{self.title} for {self.course.course_name}"
+
+    @property
+    def is_live(self):
+        """Returns True if the class is currently live."""
+        from django.utils import timezone
+        now = timezone.now()
+        return self.start_time <= now <= self.end_time
+
+    @property
+    def is_upcoming(self):
+        """Returns True if the class is in the future."""
+        from django.utils import timezone
+        now = timezone.now()
+        return self.start_time > now
