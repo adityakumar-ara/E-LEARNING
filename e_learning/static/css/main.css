@@ -1,3 +1,137 @@
-.dropdown:hover .dropdown-menu {
+/* --- Global Design System --- */
+:root {
+    --bs-primary-rgb: 74, 144, 226; /* #4A90E2 */
+    --bs-secondary-rgb: 108, 117, 125; /* #6c757d */
+    --bs-dark-rgb: 33, 37, 41; /* #212529 */
+    --bs-light-rgb: 248, 249, 250; /* #f8f9fa */
+    --bs-warning-rgb: 245, 166, 35; /* #F5A623 */
+    --bs-font-sans-serif: 'Poppins', sans-serif;
+    --bs-body-color: #343a40;
+    --bs-body-bg: #f8f9fa;
+}
+
+body {
+    font-family: var(--bs-font-sans-serif);
+    background-color: var(--bs-body-bg);
+    color: var(--bs-body-color);
+}
+
+.btn-primary {
+    --bs-btn-bg: #4A90E2;
+    --bs-btn-border-color: #4A90E2;
+    --bs-btn-hover-bg: #357ABD;
+    --bs-btn-hover-border-color: #357ABD;
+    --bs-btn-active-bg: #2a6294;
+    --bs-btn-active-border-color: #2a6294;
+}
+
+.text-primary {
+    color: #4A90E2 !important;
+}
+
+.btn-primary, .btn-theme { /* .btn-theme for legacy buttons */
+    --bs-btn-bg: #4A90E2;
+    --bs-btn-border-color: #4A90E2;
+    --bs-btn-hover-bg: #357ABD;
+    --bs-btn-hover-border-color: #357ABD;
+}
+.text-warning {
+    color: #F5A623 !important;
+}
+
+.card {
+    border: none;
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    border-radius: 0.5rem;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+/* --- Navbar Redesign --- */
+.navbar.bg-dark {
+    background-color: #2c3e50 !important;
+}
+
+.navbar-brand {
+    font-weight: 700;
+    font-size: 1.5rem;
+}
+
+.nav-link {
+    font-weight: 500;
+}
+
+.navbar .nav-item.dropdown:hover .dropdown-menu {
     display: block;
+    margin-top: 0;
+    border-radius: 0.5rem;
+    border: none;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+/* --- Footer Redesign --- */
+footer.bg-dark {
+    background-color: #2c3e50 !important;
+}
+footer a.text-white:hover {
+    color: #F5A623 !important;
+    text-decoration: underline !important;
+}
+
+/* --- Course Detail Page --- */
+.nav-tabs .nav-link {
+    color: var(--bs-secondary-rgb);
+    border: none;
+    border-bottom: 2px solid transparent;
+}
+.nav-tabs .nav-link.active, .nav-tabs .nav-item.show .nav-link {
+    color: var(--bs-primary);
+    background-color: transparent;
+    border-color: var(--bs-primary);
+    font-weight: bold;
+}
+
+/* --- Live Classes Page --- */
+.live-now-card-horizontal {
+    border-left: 4px solid var(--bs-danger);
+    background-color: #fff8f8; /* A very light red tint */
+}
+
+.live-class-img, .live-class-img-placeholder {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.upcoming-class-img, .upcoming-class-img-placeholder {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+}
+
+.live-badge {
+    display: inline-block;
+    padding: 0.35em 0.65em;
+    font-size: .75em;
+    font-weight: 700;
+    line-height: 1;
+    color: #fff;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: baseline;
+    border-radius: 0.25rem;
+    background-color: var(--bs-danger);
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(220, 53, 69, 0);
+    }
 }

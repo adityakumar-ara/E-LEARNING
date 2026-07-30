@@ -157,7 +157,7 @@ def verify_otp(request):
     else:
         form = OTPVerificationForm()
     
-    return render(request, 'registration/verify_otp.html', {'form': form})
+    return render(request, 'verify_otp.html', {'form': form})
 
 def course_view(request):
     query = request.GET.get('q', '')

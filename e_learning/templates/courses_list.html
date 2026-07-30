@@ -1,48 +1,133 @@
 {% extends 'main.html' %}
 
-{% block content %} 
-<div class="container py-5">
-    <div class="text-center mb-5">
-        <h1 class="fw-bold">Explore Our Courses</h1>
-        <p class="lead text-muted">Find the perfect course to boost your skills and career.</p>
-    </div>
+{% block extra_css %}
+<style>
+    .courses-hero {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.14), rgba(56, 189, 248, 0.08));
+        border-radius: 2rem;
+        padding: 3rem 1.5rem;
+        margin-bottom: 2rem;
+    }
 
-    <!-- Search and Filter Bar -->
-    <div class="row justify-content-center mb-4">
-        <div class="col-md-8">
-            <form method="get" action="{% url 'course_list' %}">
-                <div class="input-group">
-                    <input type="text" class="form-control" name="q" placeholder="Search for courses..." value="{{ search_query|default:'' }}">
-                    <button class="btn btn-primary" type="submit">Search</button>
-                </div>
-            </form>
+    .courses-hero h1 {
+        font-size: clamp(2.75rem, 2.5vw, 3.5rem);
+    }
+
+    .course-search .form-control {
+        border-radius: 2rem 0 0 2rem;
+        border-right: none;
+    }
+
+    .course-search .btn {
+        border-radius: 0 2rem 2rem 0;
+        min-width: 140px;
+    }
+
+    .course-card {
+        border: none;
+        border-radius: 1.5rem;
+        overflow: hidden;
+        transition: transform 0.25s ease, box-shadow 0.25s ease;
+    }
+
+    .course-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 24px 60px rgba(15, 23, 42, 0.12);
+    }
+
+    .course-card img {
+        height: 240px;
+        object-fit: cover;
+    }
+
+    .course-card-body {
+        min-height: 340px;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .course-meta {
+        gap: 1rem;
+        color: #6b7280;
+    }
+
+    .course-price {
+        font-size: 1.35rem;
+        font-weight: 700;
+    }
+
+    .course-price del {
+        margin-left: 0.75rem;
+        color: #9ca3af;
+        font-size: 0.95rem;
+    }
+
+    .course-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.45rem 0.8rem;
+        border-radius: 999px;
+        background: rgba(59, 130, 246, 0.12);
+        color: #1d4ed8;
+        font-size: 0.9rem;
+        font-weight: 600;
+    }
+</style>
+{% endblock extra_css %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="courses-hero text-center">
+        <span class="course-badge mb-3 d-inline-block">Explore</span>
+        <h1 class="fw-bold mb-3">Explore Our Courses</h1>
+        <p class="lead text-muted mb-4">Find the perfect course to boost your skills and career.</p>
+        <div class="row justify-content-center">
+            <div class="col-xl-7 col-lg-8">
+                <form method="get" action="{% url 'course_list' %}" class="course-search">
+                    <div class="input-group shadow-sm rounded-pill overflow-hidden border border-1 border-primary">
+                        <input type="text" class="form-control form-control-lg" name="q" placeholder="Search for courses..." value="{{ search_query|default:'' }}">
+                        <button class="btn btn-primary btn-lg" type="submit">Search</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 
-    <!-- Course Cards -->
     <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
         {% for course in courses %}
         <div class="col">
-            <div class="card h-100">
+            <div class="card course-card h-100">
                 {% if course.course_image %}
-                <img src="{{ course.course_image.url }}" class="card-img-top" alt="{{ course.course_name }}" style="height: 200px; object-fit: cover;">
+                <img src="{{ course.course_image.url }}" class="card-img-top" alt="{{ course.course_name }}">
+                {% else %}
+                <div class="bg-secondary bg-opacity-10 d-flex align-items-center justify-content-center" style="height:240px;">
+                    <span class="text-secondary fw-semibold">No image available</span>
+                </div>
                 {% endif %}
-                <div class="card-body d-flex flex-column">
-                    <h5 class="card-title fw-bold">{{ course.course_name }}</h5>
-                    {% if course.instructor %}
-                    <p class="card-text text-muted small mb-2">By {{ course.instructor.full_name|default:course.instructor.username }}</p>
-                    {% endif %}
-                    
-                    <div class="d-flex justify-content-between text-muted small mb-3">
+                <div class="card-body course-card-body p-4">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div>
+                            <h5 class="card-title fw-bold mb-1">{{ course.course_name }}</h5>
+                            {% if course.instructor %}
+                            <p class="text-muted small mb-0">By {{ course.instructor.full_name|default:course.instructor.username }}</p>
+                            {% endif %}
+                        </div>
+                        {% if course.discount_price %}
+                        <span class="course-badge">Discount</span>
+                        {% endif %}
+                    </div>
+                    <div class="d-flex flex-wrap course-meta mb-3 small">
                         <span><i class="bi bi-clock"></i> {{ course.duration }}</span>
                         <span><i class="bi bi-people"></i> {{ course.enrollment_count }} enrolled</span>
                     </div>
+                    <p class="text-muted mb-4">{{ course.about_course|truncatewords:20 }}</p>
 
                     <div class="mt-auto">
                         <div class="d-flex justify-content-between align-items-center mb-3">
-                            <div class="fw-bold fs-5 text-primary-emphasis">
+                            <div class="course-price text-primary">
                                 {% if course.discount_price %}
-                                    ${{ course.discount_price }} <del class="text-muted fs-6">${{ course.price }}</del>
+                                    ${{ course.discount_price }} <del>${{ course.price }}</del>
                                 {% elif course.price > 0 %}
                                     ${{ course.price }}
                                 {% else %}
@@ -50,20 +135,20 @@
                                 {% endif %}
                             </div>
                             {% if course.average_rating %}
-                            <div class="text-warning">
+                            <div class="text-warning small">
                                 <i class="bi bi-star-fill"></i> {{ course.average_rating|floatformat:1 }}
                             </div>
                             {% endif %}
                         </div>
-                        <div class="d-grid gap-2">
-                            <a href="{% url 'course_detail' course.id %}" class="btn btn-outline-secondary">View Course</a>
-                        </div>
+                        <a href="{% url 'course_detail' course.id %}" class="btn btn-outline-primary w-100">View Course</a>
                     </div>
                 </div>
             </div>
         </div>
         {% empty %}
-        <p class="text-center">No courses found.</p>
+        <div class="col-12">
+            <div class="alert alert-info text-center">No courses found. Try a different search term.</div>
+        </div>
         {% endfor %}
     </div>
 </div>
