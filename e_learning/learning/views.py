@@ -196,3 +196,28 @@ def course_detail(request, course_id):
         'upcoming_schedules': upcoming_schedules,
     }
     return render(request, 'course_detail.html', context)
+
+def live_classes_view(request):
+    """
+    Displays all live and upcoming classes across all courses.
+    """
+    now = timezone.now()
+
+    live_classes = ClassSchedule.objects.select_related('course').filter(
+        start_time__lte=now, end_time__gte=now
+    ).order_by('start_time')
+
+    upcoming_classes = ClassSchedule.objects.select_related('course').filter(
+        start_time__gt=now
+    ).order_by('start_time')
+
+    user_enrollments = []
+    if request.user.is_authenticated:
+        user_enrollments = list(Enrollment.objects.filter(user=request.user).values_list('course_id', flat=True))
+
+    context = {
+        'live_classes': live_classes,
+        'upcoming_classes': upcoming_classes,
+        'user_enrollments': user_enrollments,
+    }
+    return render(request, 'live_classes.html', context)
