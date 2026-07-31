@@ -1,99 +1,254 @@
-.live-hero {
-    background: radial-gradient(circle at top left, rgba(255,255,255,0.22), transparent 25%),
-                linear-gradient(135deg, #1d4ed8 0%, #2563eb 100%);
-    color: #f8fafc;
-}
-
-.live-hero .hero-summary {
-    background: #ffffff;
-}
-
-.live-hero .hero-icon {
-    width: 3rem;
-    height: 3rem;
-    display: grid;
-    place-items: center;
-}
-
-.live-hero .summary-stat {
-    background-color: #f8fafc;
-    border: 1px solid rgba(59, 130, 246, 0.12);
-}
-
-.live-now-card,
-.upcoming-class-card {
-    border: none;
-    border-radius: 1.25rem;
-    box-shadow: 0 18px 40px rgba(15, 23, 42, 0.08);
-    transition: transform 0.25s ease, box-shadow 0.25s ease;
+.upcoming-live-section {
+    position: relative;
     overflow: hidden;
+    background: #f8fbff;
 }
 
-.live-now-card:hover,
-.upcoming-class-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 24px 55px rgba(15, 23, 42, 0.12);
+.upcoming-live-section::before {
+    content: "";
+    position: absolute;
+    top: -120px;
+    right: -120px;
+    width: 360px;
+    height: 360px;
+    border-radius: 50%;
+    background: rgba(14, 165, 233, 0.16);
+    pointer-events: none;
 }
 
-.class-card-media {
-    height: 180px;
-    display: grid;
-    place-items: center;
-    background-color: #f8f9fa;
-    color: #6c757d;
+.section-header {
+    position: relative;
+    z-index: 1;
+}
+
+.section-label {
+    display: inline-block;
+    margin-bottom: 1rem;
+    padding: 0.65rem 1.1rem;
+    border-radius: 999px;
+    background: rgba(59, 130, 246, 0.12);
+    color: #1d4ed8;
     font-weight: 700;
+    letter-spacing: 0.2em;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    font-size: 0.85rem;
 }
 
-.class-card-media img {
-    width: 100%;
-    height: 180px;
-    object-fit: cover;
+.section-title {
+    font-size: clamp(2rem, 1.8rem + 1vw, 2.75rem);
+    font-weight: 800;
+    line-height: 1.05;
+    margin-bottom: 1rem;
+    color: #0f172a;
 }
 
-.live-now-card .card-body,
-.upcoming-class-card .card-body {
-    min-height: 320px;
-    display: flex;
-    flex-direction: column;
+.section-copy {
+    max-width: 760px;
+    margin: 0 auto;
+    color: #475569;
+    font-size: 1rem;
+    line-height: 1.75;
 }
 
-.live-badge {
+.overview-panel {
+    background: #ffffff;
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    box-shadow: 0 16px 36px rgba(15, 23, 42, 0.06);
+}
+
+.overview-pill {
     display: inline-flex;
     align-items: center;
     gap: 0.4rem;
-    padding: 0.45rem 0.8rem;
-    font-size: 0.8rem;
-    font-weight: 700;
-    color: #fff;
+    padding: 0.6rem 1rem;
     border-radius: 999px;
-    background-color: #dc2626;
-    box-shadow: 0 8px 20px rgba(220, 38, 38, 0.18);
+    background: rgba(59, 130, 246, 0.12);
+    color: #1d4ed8;
+    font-weight: 700;
 }
 
-.upcoming-class-card .badge {
-    background-color: #64748b;
+.overview-items {
+    color: #334155;
+    gap: 1.5rem;
 }
 
-.upcoming-class-card .card-body {
-    justify-content: space-between;
+.overview-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 600;
 }
 
-.upcoming-class-card p {
-    flex: 1 0 auto;
+.live-class-card {
+    display: flex;
+    flex-direction: column;
+    background: #ffffff;
+    border-radius: 1.75rem;
+    overflow: hidden;
+    box-shadow: 0 18px 40px rgba(15, 23, 42, 0.08);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    position: relative;
+    z-index: 1;
 }
 
-.upcoming-class-card small {
+.live-class-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 28px 55px rgba(15, 23, 42, 0.14);
+}
+
+.card-image {
+    position: relative;
+    min-height: 210px;
+    background: #e2e8f0;
+    overflow: hidden;
+    display: grid;
+    place-items: center;
+}
+
+.card-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.image-fallback {
+    padding: 2rem;
+    color: #334155;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    text-align: center;
+}
+
+.card-image::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(15, 23, 42, 0.14), transparent 55%);
+}
+
+.live-badge {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    z-index: 1;
+    display: inline-flex;
+    align-items: center;
+    padding: 0.55rem 1rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.94);
+    color: #2563eb;
+    font-weight: 700;
+    font-size: 0.82rem;
+    box-shadow: 0 12px 30px rgba(15, 23, 42, 0.12);
+}
+
+.card-body {
+    padding: 1.75rem 1.75rem 0.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.course-label {
+    margin: 0;
+    color: #0ea5e9;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-size: 0.78rem;
+}
+
+.class-title {
+    margin: 0;
+    color: #0f172a;
+    font-size: 1.4rem;
+    line-height: 1.15;
+    font-weight: 800;
+}
+
+.live-meta {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.8rem;
     color: #64748b;
+    font-size: 0.95rem;
+}
+
+.live-meta span {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.class-description {
+    margin: 0;
+    color: #475569;
+    line-height: 1.75;
+    font-size: 0.96rem;
+}
+
+.card-footer {
+    padding: 0 1.75rem 1.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.join-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 170px;
+    padding: 0.95rem 1.3rem;
+    border-radius: 999px;
+    background: #0ea5e9;
+    color: #ffffff;
+    font-weight: 700;
+    text-decoration: none;
+    transition: background 0.25s ease, transform 0.25s ease;
+}
+
+.join-btn:hover {
+    background: #0b61b1;
+    transform: translateY(-1px);
+}
+
+.join-btn.disabled {
+    background: #cbd5e1;
+    color: #475569;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.empty-state {
+    padding: 2rem;
+    border: 1px dashed rgba(15, 23, 42, 0.18);
+    border-radius: 1.25rem;
+    background: #ffffff;
+    color: #475569;
+    text-align: center;
+    font-size: 1rem;
+}
+
+@media (max-width: 991px) {
+    .overview-panel {
+        text-align: center;
+    }
+
+    .overview-items {
+        justify-content: center;
+    }
 }
 
 @media (max-width: 767px) {
-    .live-hero .hero-summary {
-        margin-top: 1.5rem;
+    .card-footer {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1rem;
     }
-    .live-now-card .card-body,
-    .upcoming-class-card .card-body {
-        min-height: auto;
+
+    .live-meta {
+        grid-template-columns: 1fr;
     }
 }

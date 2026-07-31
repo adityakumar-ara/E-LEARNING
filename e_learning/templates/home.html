@@ -1,5 +1,6 @@
 {% extends 'main.html' %} {% load static %} {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/home.css' %}" />
+<link rel="stylesheet" href="{% static 'css/live_classes.css' %}" />
 {% endblock %} {% block content %}
 <div class="hero-section rounded-3">
   {% if videos.first and videos.first.video %}
