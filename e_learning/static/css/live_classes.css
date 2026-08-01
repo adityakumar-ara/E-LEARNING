@@ -1,3 +1,642 @@
+/* ========================================
+   LIVE CLASSES PAGE - ENHANCED DESIGN
+   ======================================== */
+
+/* Global Animations */
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.7;
+    }
+}
+
+@keyframes glow {
+    0%, 100% {
+        box-shadow: 0 0 20px rgba(220, 53, 69, 0.4);
+    }
+    50% {
+        box-shadow: 0 0 30px rgba(220, 53, 69, 0.6);
+    }
+}
+
+/* ========================================
+   HERO SECTION
+   ======================================== */
+.live-hero {
+    background: linear-gradient(135deg, #0d6efd 0%, #0c5de4 50%, #0a58ca 100%);
+    position: relative;
+    overflow: hidden;
+    padding: 5rem 0 !important;
+}
+
+.live-hero::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -10%;
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, transparent 70%);
+    border-radius: 50%;
+    animation: pulse 4s ease-in-out infinite;
+}
+
+.live-hero::after {
+    content: '';
+    position: absolute;
+    bottom: -30%;
+    left: -5%;
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.08) 0%, transparent 70%);
+    border-radius: 50%;
+    animation: pulse 6s ease-in-out infinite;
+}
+
+.live-hero .container {
+    position: relative;
+    z-index: 2;
+}
+
+.live-hero .text-white {
+    animation: slideInUp 0.8s ease-out;
+}
+
+.live-hero h1 {
+    font-size: clamp(2.5rem, 5vw, 3.5rem);
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -0.5px;
+}
+
+.live-hero .lead {
+    font-size: 1.1rem;
+    font-weight: 500;
+    line-height: 1.8;
+}
+
+.live-hero .badge {
+    animation: slideInUp 0.8s ease-out 0.1s both;
+    font-size: 0.9rem;
+    padding: 0.6rem 1.2rem;
+    border-radius: 50px;
+}
+
+/* Hero Summary Card */
+.hero-summary {
+    backdrop-filter: blur(20px);
+    background: rgba(255, 255, 255, 0.95) !important;
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+    border-radius: 20px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.1);
+    animation: slideInDown 0.8s ease-out 0.2s both;
+    transition: all 0.3s ease;
+}
+
+.hero-summary:hover {
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.15);
+    transform: translateY(-5px);
+}
+
+.hero-summary .rounded-circle {
+    box-shadow: 0 8px 16px rgba(13, 110, 253, 0.3);
+    animation: slideInUp 0.8s ease-out 0.3s both;
+}
+
+.summary-stat {
+    background: linear-gradient(135deg, #e7f1ff 0%, #f0f6ff 100%);
+    border-radius: 15px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    padding: 1.5rem !important;
+    border: 2px solid rgba(13, 110, 253, 0.1);
+}
+
+.summary-stat:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 24px rgba(13, 110, 253, 0.2);
+    border-color: rgba(13, 110, 253, 0.3);
+    background: linear-gradient(135deg, #d4e9ff 0%, #e7f1ff 100%);
+}
+
+.summary-stat span {
+    font-size: 2rem;
+    background: linear-gradient(135deg, #0d6efd, #0a58ca);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* ========================================
+   SECTION HEADERS
+   ======================================== */
+.section-header {
+    margin-bottom: 3rem;
+    padding-bottom: 2rem;
+    border-bottom: 2px solid #f0f0f0;
+    animation: slideInUp 0.8s ease-out;
+}
+
+.section-header h2 {
+    font-size: 2.5rem;
+    font-weight: 800;
+    margin-bottom: 0.5rem;
+    background: linear-gradient(135deg, #0d6efd, #0a58ca);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: -0.5px;
+}
+
+.section-header p {
+    font-size: 1.1rem;
+    color: #6c757d;
+    font-weight: 500;
+    margin: 0;
+}
+
+.section-header .badge {
+    animation: slideInUp 0.8s ease-out 0.1s both;
+    font-size: 0.95rem;
+    padding: 0.75rem 1.5rem;
+    border-radius: 50px;
+    box-shadow: 0 8px 16px rgba(13, 110, 253, 0.2);
+}
+
+/* ========================================
+   LIVE NOW CARDS
+   ======================================== */
+.live-now-card {
+    border: none;
+    border-radius: 18px;
+    overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background: white;
+    animation: slideInUp 0.6s ease-out both;
+}
+
+.live-now-card:nth-child(1) { animation-delay: 0.1s; }
+.live-now-card:nth-child(2) { animation-delay: 0.2s; }
+.live-now-card:nth-child(3) { animation-delay: 0.3s; }
+
+.live-now-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 6px;
+    background: linear-gradient(90deg, #dc3545 0%, #fd7e14 50%, #ffc107 100%);
+    z-index: 10;
+    animation: slideInDown 0.6s ease-out;
+}
+
+.live-now-card:hover {
+    transform: translateY(-12px) scaleX(1.02);
+    box-shadow: 0 20px 50px rgba(13, 110, 253, 0.25);
+}
+
+.live-now-card:hover .class-card-media img {
+    transform: scale(1.12) rotate(1deg);
+    filter: brightness(1.1);
+}
+
+/* Class Card Media */
+.class-card-media {
+    height: 220px;
+    overflow: hidden;
+    background: linear-gradient(135deg, #e7f1ff 0%, #f0f6ff 100%);
+    position: relative;
+}
+
+.class-card-media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), filter 0.3s ease;
+    display: block;
+}
+
+.class-card-media::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.1) 100%);
+}
+
+/* Live Badge */
+.live-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+    color: white;
+    padding: 8px 14px;
+    border-radius: 50px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    animation: glow 2s ease-in-out infinite;
+    box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+}
+
+.live-badge::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    background: white;
+    border-radius: 50%;
+    animation: pulse 1.5s ease-in-out infinite;
+    box-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
+}
+
+/* Card Body */
+.card-body {
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    background: white;
+}
+
+.card-body .card-title {
+    font-size: 1.4rem;
+    font-weight: 800;
+    margin-bottom: 0.5rem;
+    color: #0f172a;
+    line-height: 1.2;
+    transition: color 0.3s ease;
+}
+
+.live-now-card:hover .card-title {
+    color: #0d6efd;
+}
+
+.card-body .card-subtitle {
+    color: #6c757d;
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+.card-body p {
+    color: #495057;
+    font-size: 0.95rem;
+    line-height: 1.6;
+}
+
+/* Class Info */
+.class-info {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    font-size: 0.95rem;
+    color: #6c757d;
+    font-weight: 500;
+}
+
+.class-info i {
+    color: #0d6efd;
+    min-width: 18px;
+    font-size: 1rem;
+}
+
+/* ========================================
+   UPCOMING CLASS CARDS
+   ======================================== */
+.upcoming-class-card {
+    border: none;
+    border-radius: 18px;
+    overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    text-decoration: none;
+    color: inherit;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background: white;
+    border: 1.5px solid #f0f0f0;
+    animation: slideInUp 0.6s ease-out both;
+}
+
+.upcoming-class-card:nth-child(1) { animation-delay: 0.1s; }
+.upcoming-class-card:nth-child(2) { animation-delay: 0.2s; }
+.upcoming-class-card:nth-child(3) { animation-delay: 0.3s; }
+.upcoming-class-card:nth-child(4) { animation-delay: 0.2s; }
+.upcoming-class-card:nth-child(5) { animation-delay: 0.3s; }
+.upcoming-class-card:nth-child(6) { animation-delay: 0.4s; }
+
+.upcoming-class-card:hover {
+    transform: translateY(-10px) scaleX(1.01);
+    box-shadow: 0 16px 40px rgba(13, 110, 253, 0.18);
+    border-color: #0d6efd;
+    text-decoration: none;
+    color: inherit;
+}
+
+.upcoming-class-card:hover .class-card-media img {
+    transform: scale(1.1) rotate(-1deg);
+    filter: brightness(1.08);
+}
+
+.upcoming-badge {
+    background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
+    color: white;
+    padding: 6px 12px;
+    border-radius: 50px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 4px 12px rgba(13, 110, 253, 0.2);
+    white-space: nowrap;
+}
+
+/* ========================================
+   BUTTONS
+   ======================================== */
+.btn-primary, .btn-outline-primary {
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 0.95rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border: none;
+    padding: 0.75rem 1.5rem;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
+    box-shadow: 0 8px 20px rgba(13, 110, 253, 0.3);
+}
+
+.btn-primary:hover {
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: 0 12px 30px rgba(13, 110, 253, 0.4);
+    background: linear-gradient(135deg, #0c5de4 0%, #0952b8 100%);
+}
+
+.btn-primary:active {
+    transform: translateY(-2px);
+}
+
+.btn-outline-primary {
+    color: #0d6efd;
+    border: 2px solid #0d6efd;
+    background: white;
+}
+
+.btn-outline-primary:hover {
+    transform: translateY(-4px);
+    background: #f0f6ff;
+    border-color: #0a58ca;
+    color: #0a58ca;
+    box-shadow: 0 8px 20px rgba(13, 110, 253, 0.2);
+}
+
+.btn-secondary {
+    background: #e9ecef;
+    color: #6c757d;
+    border: none;
+    border-radius: 10px;
+    font-weight: 700;
+    cursor: not-allowed;
+}
+
+.btn-secondary:hover {
+    background: #e9ecef;
+    color: #6c757d;
+}
+
+.cta-btn i {
+    font-size: 1.1rem;
+}
+
+/* ========================================
+   EMPTY STATES
+   ======================================== */
+.empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e7f1ff 100%);
+    border-radius: 18px;
+    border: 2px dashed #dee2e6;
+    animation: slideInUp 0.6s ease-out;
+    transition: all 0.3s ease;
+}
+
+.empty-state:hover {
+    border-color: #0d6efd;
+    background: linear-gradient(135deg, #f8f9fa 0%, #d4e9ff 100%);
+}
+
+.empty-state i {
+    font-size: 4rem;
+    background: linear-gradient(135deg, #0d6efd, #0a58ca);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 1.5rem;
+    animation: slideInDown 0.8s ease-out 0.2s both;
+}
+
+.empty-state p {
+    color: #0f172a;
+    margin-bottom: 0.5rem;
+    font-weight: 700;
+    font-size: 1.2rem;
+}
+
+.empty-state small {
+    color: #6c757d;
+    display: block;
+}
+
+/* ========================================
+   RESPONSIVE DESIGN
+   ======================================== */
+@media (max-width: 991px) {
+    .live-hero {
+        padding: 3.5rem 0 !important;
+    }
+
+    .live-hero h1 {
+        font-size: 2.2rem;
+    }
+
+    .section-header h2 {
+        font-size: 2rem;
+    }
+
+    .hero-summary {
+        margin-top: 2rem;
+    }
+
+    .card-body {
+        padding: 1.5rem;
+    }
+
+    .class-card-media {
+        height: 180px;
+    }
+}
+
+@media (max-width: 767px) {
+    .live-hero::before,
+    .live-hero::after {
+        display: none;
+    }
+
+    .live-hero {
+        padding: 2.5rem 0 !important;
+    }
+
+    .live-hero h1 {
+        font-size: 1.8rem;
+        margin-bottom: 1rem;
+    }
+
+    .live-hero .lead {
+        font-size: 1rem;
+    }
+
+    .section-header {
+        margin-bottom: 2rem;
+    }
+
+    .section-header h2 {
+        font-size: 1.6rem;
+    }
+
+    .section-header .ms-auto {
+        margin-left: 0 !important;
+        margin-top: 1rem;
+    }
+
+    .row.g-4 {
+        gap: 1.5rem !important;
+    }
+
+    .card-body {
+        padding: 1.25rem;
+    }
+
+    .class-card-media {
+        height: 160px;
+    }
+
+    .card-body .card-title {
+        font-size: 1.15rem;
+    }
+
+    .btn-primary, .btn-outline-primary {
+        font-size: 0.85rem;
+        padding: 0.6rem 1.2rem;
+    }
+
+    .btn-group-compact {
+        flex-direction: column;
+        align-items: stretch !important;
+    }
+
+    .d-grid {
+        gap: 0.75rem !important;
+    }
+
+    .empty-state {
+        padding: 3rem 1.5rem;
+    }
+
+    .empty-state i {
+        font-size: 3rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .live-hero {
+        padding: 2rem 0 !important;
+    }
+
+    .hero-summary {
+        padding: 1.5rem !important;
+    }
+
+    .hero-summary .rounded-circle {
+        width: 40px !important;
+        height: 40px !important;
+    }
+
+    .summary-stat {
+        padding: 1rem !important;
+    }
+
+    .summary-stat span {
+        font-size: 1.5rem;
+    }
+
+    .section-header {
+        padding-bottom: 1.5rem;
+    }
+
+    .section-header h2 {
+        font-size: 1.4rem;
+    }
+
+    .live-hero h1 {
+        font-size: 1.5rem;
+    }
+
+    .card-body .card-title {
+        font-size: 1rem;
+    }
+
+    .class-card-media {
+        height: 140px;
+    }
+}
+
+/* ========================================
+   UTILITY STYLES FROM PREVIOUS CSS
+   ======================================== */
 .upcoming-live-section {
     position: relative;
     overflow: hidden;
@@ -14,11 +653,6 @@
     border-radius: 50%;
     background: rgba(14, 165, 233, 0.16);
     pointer-events: none;
-}
-
-.section-header {
-    position: relative;
-    z-index: 1;
 }
 
 .section-label {
@@ -127,29 +761,6 @@
     background: linear-gradient(180deg, rgba(15, 23, 42, 0.14), transparent 55%);
 }
 
-.live-badge {
-    position: absolute;
-    top: 1rem;
-    left: 1rem;
-    z-index: 1;
-    display: inline-flex;
-    align-items: center;
-    padding: 0.55rem 1rem;
-    border-radius: 999px;
-    background: rgba(255, 255, 255, 0.94);
-    color: #2563eb;
-    font-weight: 700;
-    font-size: 0.82rem;
-    box-shadow: 0 12px 30px rgba(15, 23, 42, 0.12);
-}
-
-.card-body {
-    padding: 1.75rem 1.75rem 0.75rem;
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-}
-
 .course-label {
     margin: 0;
     color: #0ea5e9;
@@ -219,36 +830,4 @@
     color: #475569;
     cursor: not-allowed;
     pointer-events: none;
-}
-
-.empty-state {
-    padding: 2rem;
-    border: 1px dashed rgba(15, 23, 42, 0.18);
-    border-radius: 1.25rem;
-    background: #ffffff;
-    color: #475569;
-    text-align: center;
-    font-size: 1rem;
-}
-
-@media (max-width: 991px) {
-    .overview-panel {
-        text-align: center;
-    }
-
-    .overview-items {
-        justify-content: center;
-    }
-}
-
-@media (max-width: 767px) {
-    .card-footer {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 1rem;
-    }
-
-    .live-meta {
-        grid-template-columns: 1fr;
-    }
 }

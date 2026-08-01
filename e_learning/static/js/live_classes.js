@@ -1,6 +1,6 @@
 // Enable client-side toggle so Join appears exactly at class start time
 function updateLiveCTAs(){
-    const cards = document.querySelectorAll('[data-start]');
+    const cards = document.querySelectorAll('.live-now-card, .upcoming-class-card');
     const now = new Date();
     cards.forEach(card => {
         const start = new Date(card.getAttribute('data-start'));

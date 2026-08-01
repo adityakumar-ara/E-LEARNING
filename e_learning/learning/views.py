@@ -15,14 +15,37 @@ from .models import *
 
 def home(request):
     videos = ELVideo.objects.all()
-    featured_courses = Courses.objects.filter(is_featured=True)
-    upcoming_classes = ClassSchedule.objects.select_related('course').filter(
-        start_time__gte=timezone.now()
-    ).order_by('start_time')[:3]
+    featured_courses = Courses.objects.filter(is_featured=True).order_by('course_name')
+
+    # Updated logic for recurring upcoming classes
+    today = timezone.now().date()
+    current_time = timezone.localtime(timezone.now()).time()
+    
+    # Find schedules that are active today but haven't started yet
+    active_today = ClassSchedule.objects.select_related('course').filter(
+        start_date__lte=today, end_date__gte=today, start_time_of_day__gt=current_time
+    ).order_by('start_time_of_day')
+
+    # Find schedules for future dates
+    future_dates = ClassSchedule.objects.select_related('course').filter(
+        start_date__gt=today
+    ).order_by('start_date', 'start_time_of_day')
+
+    upcoming_classes_qs = list(active_today) + list(future_dates)
+    upcoming_classes = []
+
+    # Add dynamic start_time and end_time for the template, similar to other views
+    for schedule in upcoming_classes_qs:
+        schedule_date = schedule.start_date if schedule.start_date > today else today
+        schedule.start_time = timezone.make_aware(timezone.datetime.combine(schedule_date, schedule.start_time_of_day))
+        schedule.end_time = timezone.make_aware(timezone.datetime.combine(schedule_date, schedule.end_time_of_day))
+        upcoming_classes.append(schedule)
+
+    upcoming_classes = upcoming_classes[:3] # Limit to 3 for the homepage
 
     context = {
         'videos': videos,
-        'feature_courses' : featured_courses,
+        'featured_courses': featured_courses,
         'upcoming_classes': upcoming_classes,
     }
     return render(request, 'home.html', context)
@@ -48,7 +71,7 @@ class RegistrationForm(forms.ModelForm):
             'phone': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter your mobile number'}),
             'gender': forms.Select(attrs={'class': 'form-select'}),
         }
-
+    
     def clean_email(self):
         email = self.cleaned_data.get('email')
         if CustomeUser.objects.filter(email=email).exists():
@@ -116,6 +139,7 @@ def register(request):
                 send_mail(subject, message, from_email, to_email)
                 request.session['registration_data'] = user_data
                 request.session['otp'] = otp
+                request.session['otp_sent_at'] = timezone.now().isoformat()
                 messages.success(request, 'An OTP has been sent to your email. Please verify to complete registration.')
                 return redirect('verify_otp')
             except Exception as e:
@@ -128,7 +152,7 @@ def register(request):
 def verify_otp(request):
     if request.user.is_authenticated:
         return redirect('home')
-    if 'registration_data' not in request.session or 'otp' not in request.session:
+    if 'registration_data' not in request.session:
         messages.error(request, 'Session expired or invalid request. Please register again.')
         return redirect('register')
 
@@ -137,27 +161,88 @@ def verify_otp(request):
         if form.is_valid():
             if form.cleaned_data['otp'] == str(request.session.get('otp')):
                 user_data = request.session.pop('registration_data')
+                request.session.pop('otp_sent_at', None)
                 request.session.pop('otp')
-                
-                user = CustomeUser.objects.create_user(
-                    username=user_data['email'],
-                    email=user_data['email'],
-                    password=user_data['password']
-                )
-                user.full_name = user_data['full_name']
-                user.phone = user_data['phone']
-                user.gender = user_data.get('gender')
-                user.save()
 
-                messages.success(request, 'Welcome! Your account has been created successfully.')
-                login(request, user)
-                return redirect('home')
+                email = user_data['email']
+                phone = user_data['phone']
+                
+                # First, check if email already exists
+                existing_user = CustomeUser.objects.filter(email=email).first()
+                
+                if existing_user:
+                    # User exists - just update their info and login
+                    existing_user.full_name = user_data['full_name']
+                    existing_user.phone = phone
+                    existing_user.gender = user_data.get('gender', '')
+                    existing_user.set_password(user_data['password'])
+                    existing_user.save()
+                    messages.success(request, 'Welcome! Your account has been updated successfully.')
+                    login(request, existing_user)
+                    return redirect('home')
+                else:
+                    # Brand new user - check if phone is already taken by someone else
+                    phone_exists = CustomeUser.objects.filter(phone=phone).exists()
+                    
+                    if phone_exists:
+                        messages.error(request, "This phone number is already registered. Please use a different phone number or login with your existing account.")
+                        return redirect('register')
+                    
+                    # Create new user
+                    try:
+                        user = CustomeUser.objects.create_user(
+                            username=email,
+                            email=email,
+                            password=user_data['password'],
+                            full_name=user_data['full_name'],
+                            phone=phone,
+                            gender=user_data.get('gender', '')
+                        )
+                        messages.success(request, 'Welcome! Your account has been created successfully.')
+                        login(request, user)
+                        return redirect('home')
+                    except Exception as e:
+                        messages.error(request, f"Error creating account: {str(e)}")
+                        return redirect('register')
             else:
                 messages.error(request, 'Invalid OTP. Please try again.')
     else:
         form = OTPVerificationForm()
     
     return render(request, 'verify_otp.html', {'form': form})
+
+def resend_otp(request):
+    if 'registration_data' not in request.session:
+        messages.error(request, 'Session expired. Please start the registration process again.')
+        return redirect('register')
+
+    # Simple rate-limiting: allow resend only after 60 seconds
+    last_sent_time_str = request.session.get('otp_sent_at')
+    if last_sent_time_str:
+        last_sent_time = timezone.datetime.fromisoformat(last_sent_time_str)
+        if timezone.now() - last_sent_time < timezone.timedelta(seconds=60):
+            messages.warning(request, 'Please wait at least 60 seconds before requesting a new OTP.')
+            return redirect('verify_otp')
+
+    user_data = request.session['registration_data']
+    otp = random.randint(100000, 999999)
+
+    subject = 'Your New Email Verification OTP'
+    message = f'Hello {user_data["full_name"]},\n\nYour new OTP for registration is: {otp}\n\nThank you!'
+    from_email = getattr(settings, 'DEFAULT_FROM_EMAIL', 'webmaster@localhost')
+    to_email = [user_data['email']]
+
+    try:
+        send_mail(subject, message, from_email, to_email)
+        # Update session with new OTP and timestamp
+        request.session['otp'] = otp
+        request.session['otp_sent_at'] = timezone.now().isoformat()
+        messages.success(request, 'A new OTP has been sent to your email.')
+    except Exception as e:
+        messages.error(request, f'Failed to send OTP email. Error: {e}')
+
+    return redirect('verify_otp')
+
 
 def course_view(request):
     query = request.GET.get('q', '')
@@ -184,10 +269,28 @@ def course_detail(request, course_id):
     if request.user.is_authenticated:
         is_enrolled = Enrollment.objects.filter(user=request.user, course=course).exists()
 
-    # Get live and upcoming schedules
-    now = timezone.now()
-    live_schedules = course.class_schedules.filter(start_time__lte=now, end_time__gte=now).order_by('start_time')
-    upcoming_schedules = course.class_schedules.filter(start_time__gt=now).order_by('start_time')
+    # Updated logic for recurring schedules
+    today = timezone.now().date()
+    current_time = timezone.localtime(timezone.now()).time()
+
+    live_schedules = []
+    upcoming_schedules = []
+
+    # Find all schedules for this course that are active today or in the future
+    active_schedules = course.class_schedules.filter(end_date__gte=today).order_by('start_date', 'start_time_of_day')
+
+    for schedule in active_schedules:
+        # Create timezone-aware start and end datetimes for today
+        start_dt = timezone.make_aware(timezone.datetime.combine(today, schedule.start_time_of_day))
+        end_dt = timezone.make_aware(timezone.datetime.combine(today, schedule.end_time_of_day))
+
+        schedule.start_time = start_dt
+        schedule.end_time = end_dt
+
+        if schedule.is_live:
+            live_schedules.append(schedule)
+        elif schedule.start_date > today or (schedule.start_date == today and schedule.start_time_of_day > current_time):
+            upcoming_schedules.append(schedule)
 
     context = {
         'course': course,
@@ -201,15 +304,30 @@ def live_classes_view(request):
     """
     Displays all live and upcoming classes across all courses.
     """
-    now = timezone.now()
+    today = timezone.now().date()
+    current_time = timezone.localtime(timezone.now()).time()
 
-    live_classes = ClassSchedule.objects.select_related('course').filter(
-        start_time__lte=now, end_time__gte=now
-    ).order_by('start_time')
+    # Find all schedules that are active today
+    active_schedules = ClassSchedule.objects.select_related('course').filter(
+        start_date__lte=today, end_date__gte=today
+    ).order_by('start_time_of_day')
 
-    upcoming_classes = ClassSchedule.objects.select_related('course').filter(
-        start_time__gt=now
-    ).order_by('start_time')
+    live_classes = []
+    upcoming_classes = []
+
+    for schedule in active_schedules:
+        # Create timezone-aware start and end datetimes for today
+        start_dt = timezone.make_aware(timezone.datetime.combine(today, schedule.start_time_of_day))
+        end_dt = timezone.make_aware(timezone.datetime.combine(today, schedule.end_time_of_day))
+
+        # Add these as attributes to the schedule object for the template
+        schedule.start_time = start_dt
+        schedule.end_time = end_dt
+
+        if schedule.start_time_of_day <= current_time <= schedule.end_time_of_day:
+            live_classes.append(schedule)
+        elif schedule.start_time_of_day > current_time:
+            upcoming_classes.append(schedule)
 
     user_enrollments = []
     if request.user.is_authenticated:

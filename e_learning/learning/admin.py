@@ -41,6 +41,6 @@ class EnrollmentAdmin(admin.ModelAdmin):
 
 @admin.register(ClassSchedule)
 class ClassScheduleAdmin(admin.ModelAdmin):
-    list_display = ('title', 'course', 'start_time', 'end_time')
-    list_filter = ('course', 'start_time')
+    list_display = ('title', 'course', 'start_date', 'end_date', 'start_time_of_day', 'end_time_of_day')
+    list_filter = ('course', 'start_date')
     search_fields = ('title', 'course__course_name')

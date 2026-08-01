@@ -66,12 +66,17 @@ class ClassSchedule(models.Model):
     course = models.ForeignKey(Courses, on_delete=models.CASCADE, related_name='class_schedules')
     title = models.CharField(max_length=200, help_text="e.g., 'Week 1: Introduction'")
     description = models.TextField(blank=True, null=True, help_text="A brief description of what will be covered in the class.")
-    start_time = models.DateTimeField()
-    end_time = models.DateTimeField()
+    
+    # Fields for daily recurring classes
+    start_time_of_day = models.TimeField(help_text="The time the class starts each day (e.g., 10:00 AM)")
+    end_time_of_day = models.TimeField(help_text="The time the class ends each day (e.g., 11:00 AM)")
+    start_date = models.DateField(help_text="The first date this class will occur.")
+    end_date = models.DateField(help_text="The last date this class will occur.")
+
     meeting_link = models.URLField(blank=True, null=True, help_text="Link to the live class (e.g., Zoom, Google Meet)")
 
     class Meta:
-        ordering = ['start_time']
+        ordering = ['start_date', 'start_time_of_day']
 
     def __str__(self):
         return f"{self.title} for {self.course.course_name}"
@@ -80,12 +85,9 @@ class ClassSchedule(models.Model):
     def is_live(self):
         """Returns True if the class is currently live."""
         from django.utils import timezone
-        now = timezone.now()
-        return self.start_time <= now <= self.end_time
-
-    @property
-    def is_upcoming(self):
-        """Returns True if the class is in the future."""
-        from django.utils import timezone
-        now = timezone.now()
-        return self.start_time > now
+        today = timezone.now().date()
+        if not (self.start_date <= today <= self.end_date):
+            return False
+        
+        current_time = timezone.localtime(timezone.now()).time()
+        return self.start_time_of_day <= current_time <= self.end_time_of_day
