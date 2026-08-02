@@ -28,20 +28,5 @@
 
 {% block extra_js %}
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-<script>
-document.getElementById('razorpay-pay-button').addEventListener('click', function () {
-  const checkout = new Razorpay({
-    key: '{{ razorpay_key_id|escapejs }}', amount: '{{ amount }}', currency: 'INR',
-    name: 'E-Learning', description: '{{ course.course_name|escapejs }}', order_id: '{{ order.id|escapejs }}',
-    handler: function (response) {
-      const form = document.getElementById('payment-confirmation');
-      form.razorpay_payment_id.value = response.razorpay_payment_id;
-      form.razorpay_order_id.value = response.razorpay_order_id;
-      form.razorpay_signature.value = response.razorpay_signature;
-      form.submit();
-    }, theme: { color: '#0d6efd' }
-  });
-  checkout.open();
-});
-</script>
+
 {% endblock extra_js %}

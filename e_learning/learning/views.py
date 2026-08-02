@@ -8,7 +8,7 @@ from django.core.mail import send_mail
 from django.conf import settings
 from django.utils import timezone
 import random
-from django.db.models import Count, Avg
+from django.db.models import Count, Avg, Q
 from django import forms
 from django.utils import timezone
 from django.urls import reverse
@@ -274,17 +274,23 @@ def resend_otp(request):
 
 def course_view(request):
     query = request.GET.get('q', '')
-    courses_list = Courses.objects.annotate(
-        enrollment_count=Count('enrollments'),
-        average_rating=Avg('reviews__rating')
-    ).select_related('instructor').order_by('-is_featured', 'course_name')
+    recorded_list = RecordedClass.objects.select_related('course').order_by('-recorded_at')
 
     if query:
-        courses_list = courses_list.filter(course_name__icontains=query)
+        recorded_list = recorded_list.filter(
+            Q(title__icontains=query) | Q(course__course_name__icontains=query)
+        )
+
+    user_enrollments = []
+    if request.user.is_authenticated:
+        user_enrollments = list(
+            Enrollment.objects.filter(user=request.user).values_list('course_id', flat=True)
+        )
 
     context = {
-        'courses': courses_list,
+        'recorded_classes': recorded_list,
         'search_query': query,
+        'user_enrollments': user_enrollments,
     }
     return render(request, 'courses_list.html', context)
 
@@ -387,6 +393,45 @@ def enroll_course(request, course_id):
 
     return render(request, 'razorpay_checkout.html', {
         'course': course,
+        'order': order,
+        'amount': amount,
+        'razorpay_key_id': settings.RAZORPAY_KEY_ID,
+        'callback_url': reverse('confirm_enrollment', args=[course.id]),
+    })
+
+
+def enroll_recorded_class(request, recorded_class_id):
+    """Create a Razorpay order for a recorded class purchase."""
+    if not request.user.is_authenticated:
+        return redirect(f'{reverse("login")}?next={request.path}')
+    if request.method != 'POST':
+        recorded_class = get_object_or_404(RecordedClass, id=recorded_class_id)
+        return redirect('course_detail', course_id=recorded_class.course.id)
+
+    recorded_class = get_object_or_404(RecordedClass, id=recorded_class_id)
+    course = recorded_class.course
+
+    if Enrollment.objects.filter(user=request.user, course=course).exists():
+        messages.info(request, 'You are already enrolled in this course.')
+        return redirect('course_detail', course_id=course.id)
+
+    price = recorded_class.discount_fee if recorded_class.discount_fee is not None else recorded_class.course_fee
+    if not price or price <= 0:
+        Enrollment.objects.get_or_create(user=request.user, course=course)
+        messages.success(request, 'You have been enrolled successfully.')
+        return redirect('course_detail', course_id=course.id)
+
+    amount = int(price * 100)
+    receipt = f'recorded-{recorded_class.id}-course-{course.id}-user-{request.user.id}-{timezone.now():%Y%m%d%H%M%S}'
+    try:
+        order = create_razorpay_order(amount, receipt)
+    except ValueError as error:
+        messages.error(request, f'Payment could not be started: {error}')
+        return redirect('course_detail', course_id=course.id)
+
+    return render(request, 'razorpay_checkout.html', {
+        'course': course,
+        'recorded_class': recorded_class,
         'order': order,
         'amount': amount,
         'razorpay_key_id': settings.RAZORPAY_KEY_ID,

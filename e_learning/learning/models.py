@@ -62,6 +62,22 @@ class Review(models.Model):
     def __str__(self):
         return f'Review for {self.course.course_name} by {self.user.email}'
 
+class RecordedClass(models.Model):
+    course = models.ForeignKey(Courses, on_delete=models.CASCADE, related_name='recorded_classes')
+    title = models.CharField(max_length=200)
+    description = models.TextField(blank=True)
+    video = models.FileField(upload_to='recorded_classes/')
+    thumbnail = models.ImageField(upload_to='recorded_thumbnails/', null=True, blank=True, help_text='Thumbnail image shown to preview users before enrollment.')
+    course_fee = models.DecimalField(max_digits=8, decimal_places=2, null=True, blank=True, help_text='Original course fee for this recorded class.')
+    discount_fee = models.DecimalField(max_digits=8, decimal_places=2, null=True, blank=True, help_text='Discounted fee for this recorded class, if applicable.')
+    recorded_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-recorded_at']
+
+    def __str__(self):
+        return f'{self.title} ({self.course.course_name})'
+
 class ClassSchedule(models.Model):
     course = models.ForeignKey(Courses, on_delete=models.CASCADE, related_name='class_schedules')
     title = models.CharField(max_length=200, help_text="e.g., 'Week 1: Introduction'")

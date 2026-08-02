@@ -44,3 +44,9 @@ class ClassScheduleAdmin(admin.ModelAdmin):
     list_display = ('title', 'course', 'start_date', 'end_date', 'start_time_of_day', 'end_time_of_day')
     list_filter = ('course', 'start_date')
     search_fields = ('title', 'course__course_name')
+
+@admin.register(RecordedClass)
+class RecordedClassAdmin(admin.ModelAdmin):
+    list_display = ('title', 'course', 'course_fee', 'discount_fee', 'recorded_at')
+    list_filter = ('course', 'recorded_at')
+    search_fields = ('title', 'course__course_name', 'description')
