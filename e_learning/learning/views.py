@@ -28,12 +28,14 @@ def home(request):
 
     feature_courses = Courses.objects.filter(
         is_featured=True,
-        class_schedules__end_date__gte=today
+        class_schedules__start_date__gt=today,
+    ).exclude(
+        class_schedules__start_date__lte=today
     ).distinct().order_by('course_name')
 
-    schedules_qs = ClassSchedule.objects.select_related('course').filter(
-        end_date__gte=today
-    ).order_by('start_date', 'start_time_of_day')
+    schedules_qs = ClassSchedule.objects.select_related('course').order_by(
+        'start_date', 'start_time_of_day'
+    )
 
     live_schedules = []
     pending_schedules = []
@@ -44,12 +46,11 @@ def home(request):
         schedule.start_time = timezone.make_aware(timezone.datetime.combine(schedule_date, schedule.start_time_of_day), tz)
         schedule.end_time = timezone.make_aware(timezone.datetime.combine(schedule_date, schedule.end_time_of_day), tz)
 
-        if schedule.start_date <= today <= schedule.end_date:
-            if current_time < schedule.start_time_of_day:
-                pending_schedules.append(schedule)
-            else:
-                live_schedules.append(schedule)
-        elif schedule.start_date > today:
+        # Once a class has reached its start date, it stays in the homepage Live section.
+        # Only not-yet-started classes are kept in Upcoming and Featured sections.
+        if schedule.start_date <= today:
+            live_schedules.append(schedule)
+        else:
             pending_schedules.append(schedule)
 
     user_enrollments = []
