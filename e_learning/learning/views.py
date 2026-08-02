@@ -45,7 +45,10 @@ def home(request):
         schedule.end_time = timezone.make_aware(timezone.datetime.combine(schedule_date, schedule.end_time_of_day), tz)
 
         if schedule.start_date <= today <= schedule.end_date:
-            live_schedules.append(schedule)
+            if current_time < schedule.start_time_of_day:
+                pending_schedules.append(schedule)
+            else:
+                live_schedules.append(schedule)
         elif schedule.start_date > today:
             pending_schedules.append(schedule)
 
@@ -56,8 +59,8 @@ def home(request):
     context = {
         'videos': videos,
         'feature_courses': feature_courses,
-        'live_schedules': live_schedules[:3],
-        'pending_schedules': pending_schedules[:3],
+        'live_schedules': live_schedules,
+        'pending_schedules': pending_schedules,
         'user_enrollments': user_enrollments,
     }
     return render(request, 'home.html', context)
@@ -412,10 +415,10 @@ def live_classes_view(request):
     today = now.date()
     current_time = now.time()
 
-    # Find all schedules that are active today
-    active_schedules = ClassSchedule.objects.select_related('course').filter(
-        start_date__lte=today, end_date__gte=today
-    ).order_by('start_time_of_day')
+    # Include every saved schedule so the page is a complete class archive.
+    all_schedules = ClassSchedule.objects.select_related('course').order_by(
+        'start_date', 'start_time_of_day'
+    )
 
     today_classes = []
     upcoming_classes = []
@@ -425,36 +428,35 @@ def live_classes_view(request):
         user_enrollments = list(Enrollment.objects.filter(user=request.user).values_list('course_id', flat=True))
 
     tz = timezone.get_current_timezone()
-    for schedule in active_schedules:
-        # Create timezone-aware start and end datetimes for today
-        start_dt = timezone.make_aware(timezone.datetime.combine(today, schedule.start_time_of_day), tz)
-        end_dt = timezone.make_aware(timezone.datetime.combine(today, schedule.end_time_of_day), tz)
+    for schedule in all_schedules:
+        if schedule.start_date > today:
+            schedule.start_time = timezone.make_aware(
+                timezone.datetime.combine(schedule.start_date, schedule.start_time_of_day), tz
+            )
+            schedule.end_time = timezone.make_aware(
+                timezone.datetime.combine(schedule.start_date, schedule.end_time_of_day), tz
+            )
+            schedule.is_enrolled = schedule.course.id in user_enrollments
+            upcoming_classes.append(schedule)
+            continue
+
+        # Recurring classes use today's time while active; finished classes retain their last scheduled date.
+        display_date = today if schedule.end_date >= today else schedule.end_date
+        start_dt = timezone.make_aware(timezone.datetime.combine(display_date, schedule.start_time_of_day), tz)
+        end_dt = timezone.make_aware(timezone.datetime.combine(display_date, schedule.end_time_of_day), tz)
 
         schedule.start_time = start_dt
         schedule.end_time = end_dt
 
-        if schedule.start_time_of_day <= current_time <= schedule.end_time_of_day:
+        if schedule.start_date <= today <= schedule.end_date and schedule.start_time_of_day <= current_time <= schedule.end_time_of_day:
             schedule.activity_status = 'live'
-        elif current_time < schedule.start_time_of_day:
+        elif schedule.end_date >= today and current_time < schedule.start_time_of_day:
             schedule.activity_status = 'upcoming'
         else:
             schedule.activity_status = 'ended'
 
         schedule.is_enrolled = schedule.course.id in user_enrollments
         today_classes.append(schedule)
-
-    future_schedules = ClassSchedule.objects.select_related('course').filter(
-        start_date__gt=today
-    ).order_by('start_date', 'start_time_of_day')
-    for schedule in future_schedules:
-        schedule.start_time = timezone.make_aware(
-            timezone.datetime.combine(schedule.start_date, schedule.start_time_of_day), tz
-        )
-        schedule.end_time = timezone.make_aware(
-            timezone.datetime.combine(schedule.start_date, schedule.end_time_of_day), tz
-        )
-        schedule.is_enrolled = schedule.course.id in user_enrollments
-        upcoming_classes.append(schedule)
 
     context = {
         'today_classes': today_classes,
