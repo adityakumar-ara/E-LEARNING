@@ -137,7 +137,10 @@
                             {% if is_enrolled %}
                                 <button class="btn btn-success btn-lg" disabled>You are Enrolled</button>
                             {% else %}
-                                <a href="#" class="btn btn-primary btn-lg">Enroll Now</a>
+                                <form method="post" action="{% url 'enroll_course' course.id %}">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-primary btn-lg w-100">Enroll Now</button>
+                                </form>
                             {% endif %}
                         {% else %}
                             <a href="{% url 'login' %}?next={{ request.path }}" class="btn btn-primary btn-lg">Sign in to Enroll</a>

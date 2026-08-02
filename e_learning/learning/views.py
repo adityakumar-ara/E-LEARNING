@@ -11,6 +11,13 @@ import random
 from django.db.models import Count, Avg
 from django import forms
 from django.utils import timezone
+from django.urls import reverse
+import base64
+import hashlib
+import hmac
+import json
+import urllib.error
+import urllib.request
 from .models import *
 
 def home(request):
@@ -306,6 +313,96 @@ def course_detail(request, course_id):
         'upcoming_schedules': upcoming_schedules,
     }
     return render(request, 'course_detail.html', context)
+
+
+def create_razorpay_order(amount, receipt):
+    """Create a Razorpay order using the server-side secret key."""
+    payload = json.dumps({
+        'amount': amount,
+        'currency': 'INR',
+        'receipt': receipt,
+    }).encode('utf-8')
+    credentials = f'{settings.RAZORPAY_KEY_ID}:{settings.RAZORPAY_KEY_SECRET}'
+    authorization = base64.b64encode(credentials.encode('utf-8')).decode('utf-8')
+    request = urllib.request.Request(
+        'https://api.razorpay.com/v1/orders',
+        data=payload,
+        headers={
+            'Content-Type': 'application/json',
+            'Authorization': f'Basic {authorization}',
+        },
+        method='POST',
+    )
+    try:
+        with urllib.request.urlopen(request, timeout=30) as response:
+            return json.load(response)
+    except urllib.error.HTTPError as error:
+        details = error.read().decode('utf-8')
+        raise ValueError(details or 'Razorpay could not create an order.')
+    except urllib.error.URLError as error:
+        raise ValueError('Unable to connect to Razorpay. Please try again.') from error
+
+
+def enroll_course(request, course_id):
+    """Create a Razorpay order for a paid course or enroll immediately if free."""
+    if not request.user.is_authenticated:
+        return redirect(f'{reverse("login")}?next={request.path}')
+    if request.method != 'POST':
+        return redirect('course_detail', course_id=course_id)
+
+    course = get_object_or_404(Courses, id=course_id)
+    if Enrollment.objects.filter(user=request.user, course=course).exists():
+        messages.info(request, 'You are already enrolled in this course.')
+        return redirect('course_detail', course_id=course.id)
+
+    price = course.discount_price if course.discount_price is not None else course.price
+    if not price or price <= 0:
+        Enrollment.objects.get_or_create(user=request.user, course=course)
+        messages.success(request, 'You have been enrolled successfully.')
+        return redirect('course_detail', course_id=course.id)
+
+    amount = int(price * 100)  # Razorpay accepts the amount in paise.
+    receipt = f'course-{course.id}-user-{request.user.id}-{timezone.now():%Y%m%d%H%M%S}'
+    try:
+        order = create_razorpay_order(amount, receipt)
+    except ValueError as error:
+        messages.error(request, f'Payment could not be started: {error}')
+        return redirect('course_detail', course_id=course.id)
+
+    return render(request, 'razorpay_checkout.html', {
+        'course': course,
+        'order': order,
+        'amount': amount,
+        'razorpay_key_id': settings.RAZORPAY_KEY_ID,
+        'callback_url': reverse('confirm_enrollment', args=[course.id]),
+    })
+
+
+def confirm_enrollment(request, course_id):
+    """Verify Razorpay's signature and then create the course enrollment."""
+    if not request.user.is_authenticated or request.method != 'POST':
+        return redirect('course_detail', course_id=course_id)
+
+    course = get_object_or_404(Courses, id=course_id)
+    payment_id = request.POST.get('razorpay_payment_id', '')
+    order_id = request.POST.get('razorpay_order_id', '')
+    signature = request.POST.get('razorpay_signature', '')
+    if not all((payment_id, order_id, signature)):
+        messages.error(request, 'Payment verification details are missing.')
+        return redirect('course_detail', course_id=course.id)
+
+    expected_signature = hmac.new(
+        settings.RAZORPAY_KEY_SECRET.encode('utf-8'),
+        f'{order_id}|{payment_id}'.encode('utf-8'),
+        hashlib.sha256,
+    ).hexdigest()
+    if not hmac.compare_digest(expected_signature, signature):
+        messages.error(request, 'Payment verification failed. You were not enrolled.')
+        return redirect('course_detail', course_id=course.id)
+
+    Enrollment.objects.get_or_create(user=request.user, course=course)
+    messages.success(request, 'Payment successful. You are now enrolled in this course.')
+    return redirect('course_detail', course_id=course.id)
 
 def live_classes_view(request):
     """
