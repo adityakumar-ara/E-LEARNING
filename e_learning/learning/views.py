@@ -316,39 +316,54 @@ def live_classes_view(request):
     current_time = now.time()
 
     # Find all schedules that are active today
-    schedules_qs = ClassSchedule.objects.select_related('course').filter(
-        end_date__gte=today
-    ).order_by('start_date', 'start_time_of_day')
+    active_schedules = ClassSchedule.objects.select_related('course').filter(
+        start_date__lte=today, end_date__gte=today
+    ).order_by('start_time_of_day')
+
+    today_classes = []
+    upcoming_classes = []
 
     user_enrollments = []
     if request.user.is_authenticated:
         user_enrollments = list(Enrollment.objects.filter(user=request.user).values_list('course_id', flat=True))
-    enrolled_set = set(user_enrollments)
 
-    all_schedules = []
     tz = timezone.get_current_timezone()
-    for schedule in schedules_qs:
-        schedule_date = today if schedule.start_date <= today else schedule.start_date
-        schedule.start_time = timezone.make_aware(timezone.datetime.combine(schedule_date, schedule.start_time_of_day), tz)
-        schedule.end_time = timezone.make_aware(timezone.datetime.combine(schedule_date, schedule.end_time_of_day), tz)
+    for schedule in active_schedules:
+        # Create timezone-aware start and end datetimes for today
+        start_dt = timezone.make_aware(timezone.datetime.combine(today, schedule.start_time_of_day), tz)
+        end_dt = timezone.make_aware(timezone.datetime.combine(today, schedule.end_time_of_day), tz)
 
-        schedule.is_enrolled = schedule.course.id in enrolled_set
-        schedule.is_active_today = schedule.start_date <= today <= schedule.end_date
+        schedule.start_time = start_dt
+        schedule.end_time = end_dt
 
-        if schedule.is_active_today:
-            if current_time < schedule.start_time_of_day:
-                schedule.current_status = 'wait'
-            elif schedule.start_time_of_day <= current_time <= schedule.end_time_of_day:
-                schedule.current_status = 'join' if schedule.is_enrolled and schedule.meeting_link else 'enroll' if not schedule.is_enrolled else 'wait'
-            else:
-                schedule.current_status = 'wait'
+        if schedule.start_time_of_day <= current_time <= schedule.end_time_of_day:
+            schedule.activity_status = 'live'
+        elif current_time < schedule.start_time_of_day:
+            schedule.activity_status = 'upcoming'
         else:
-            schedule.current_status = 'wait'
+            schedule.activity_status = 'ended'
 
-        all_schedules.append(schedule)
+        schedule.is_enrolled = schedule.course.id in user_enrollments
+        today_classes.append(schedule)
+
+    future_schedules = ClassSchedule.objects.select_related('course').filter(
+        start_date__gt=today
+    ).order_by('start_date', 'start_time_of_day')
+    for schedule in future_schedules:
+        schedule.start_time = timezone.make_aware(
+            timezone.datetime.combine(schedule.start_date, schedule.start_time_of_day), tz
+        )
+        schedule.end_time = timezone.make_aware(
+            timezone.datetime.combine(schedule.start_date, schedule.end_time_of_day), tz
+        )
+        schedule.is_enrolled = schedule.course.id in user_enrollments
+        upcoming_classes.append(schedule)
 
     context = {
-        'all_schedules': all_schedules,
+        'today_classes': today_classes,
+        'upcoming_classes': upcoming_classes,
+        'live_count': sum(item.activity_status == 'live' for item in today_classes),
+        'upcoming_count': sum(item.activity_status == 'upcoming' for item in today_classes) + len(upcoming_classes),
         'user_enrollments': user_enrollments,
     }
     return render(request, 'live_classes.html', context)

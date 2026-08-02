@@ -62,8 +62,20 @@ function updateLiveCTAs(){
         }
     });
 
-    if(liveCount) liveCount.textContent = document.querySelectorAll('#live-now-list [data-card-container]').length;
-    if(upcomingCount) upcomingCount.textContent = document.querySelectorAll('#upcoming-list [data-card-container]').length;
+    let liveTotal = 0;
+    let upcomingTotal = 0;
+    cards.forEach(card => {
+        const start = parseIsoDate(card.dataset.start);
+        const end = parseIsoDate(card.dataset.end);
+        if(!start || !end) return;
+        const isLive = now.getTime() >= start.getTime() && now.getTime() <= end.getTime();
+        const isUpcoming = now.getTime() < start.getTime();
+        if(isLive) liveTotal += 1;
+        else if(isUpcoming) upcomingTotal += 1;
+    });
+
+    if(liveCount) liveCount.textContent = liveTotal;
+    if(upcomingCount) upcomingCount.textContent = upcomingTotal;
 }
 
 function makeJoinButton(cta, meeting){
