@@ -33,25 +33,36 @@ def home(request):
         class_schedules__start_date__lte=today
     ).distinct().order_by('course_name')
 
-    schedules_qs = ClassSchedule.objects.select_related('course').order_by(
-        'start_date', 'start_time_of_day'
-    )
+    schedules_qs = ClassSchedule.objects.select_related('course').annotate(
+        enrollment_count=Count('course__enrollments', distinct=True)
+    ).order_by('start_date', 'start_time_of_day')
 
-    live_schedules = []
+    currently_live_schedules = []
+    all_schedule_cards = []
     pending_schedules = []
+    tz = timezone.get_current_timezone()
 
     for schedule in schedules_qs:
         schedule_date = today if schedule.start_date <= today else schedule.start_date
-        tz = timezone.get_current_timezone()
         schedule.start_time = timezone.make_aware(timezone.datetime.combine(schedule_date, schedule.start_time_of_day), tz)
         schedule.end_time = timezone.make_aware(timezone.datetime.combine(schedule_date, schedule.end_time_of_day), tz)
+        all_schedule_cards.append(schedule)
 
-        # Once a class has reached its start date, it stays in the homepage Live section.
-        # Only not-yet-started classes are kept in Upcoming and Featured sections.
-        if schedule.start_date <= today:
-            live_schedules.append(schedule)
-        else:
+        if schedule.start_date <= today <= schedule.end_date and schedule.start_time_of_day <= current_time <= schedule.end_time_of_day:
+            currently_live_schedules.append(schedule)
+        # A class is upcoming on the homepage only until its first scheduled date arrives.
+        elif schedule.start_date > today:
             pending_schedules.append(schedule)
+
+    # The Live section always shows three cards: real-time sessions first, otherwise popular classes.
+    home_live_is_fallback = not currently_live_schedules
+    if currently_live_schedules:
+        live_schedules = currently_live_schedules[:3]
+    else:
+        live_schedules = sorted(
+            all_schedule_cards,
+            key=lambda schedule: (-schedule.enrollment_count, schedule.start_date, schedule.start_time_of_day),
+        )[:3]
 
     user_enrollments = []
     if request.user.is_authenticated:
@@ -61,6 +72,7 @@ def home(request):
         'videos': videos,
         'feature_courses': feature_courses,
         'live_schedules': live_schedules,
+        'home_live_is_fallback': home_live_is_fallback,
         'pending_schedules': pending_schedules,
         'user_enrollments': user_enrollments,
     }

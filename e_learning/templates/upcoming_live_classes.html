@@ -2,16 +2,16 @@
   <div class="container">
     <div class="section-header text-center mb-5">
       <p class="section-label">Live Classes</p>
-      <h1 class="section-title">Join classes that are live right now</h1>
-      <p class="section-copy mx-auto">Open sessions are running now. Jump in and learn with instructors in real time.</p>
+      <h1 class="section-title">{% if home_live_is_fallback %}Popular Classes{% else %}Join classes that are live right now{% endif %}</h1>
+      <p class="section-copy mx-auto">{% if home_live_is_fallback %}No session is live right now, so these are the three most-enrolled classes.{% else %}Open sessions are running now. Jump in and learn with instructors in real time.{% endif %}</p>
     </div>
 
     <div class="row justify-content-center mb-4">
       <div class="col-lg-10">
         <div class="overview-panel d-flex flex-column flex-md-row align-items-center justify-content-between gap-3 p-4 rounded-4">
-          <span class="overview-pill">Live sessions in progress</span>
+          <span class="overview-pill">{% if home_live_is_fallback %}Most popular classes{% else %}Live sessions in progress{% endif %}</span>
           <div class="overview-items d-flex flex-wrap gap-3 text-center text-sm-start">
-            <span class="overview-item"><strong>{{ live_schedules|length }}</strong> classes live now</span>
+            <span class="overview-item"><strong>{{ live_schedules|length }}</strong> {% if home_live_is_fallback %}popular classes{% else %}classes live now{% endif %}</span>
             <span class="overview-item"><strong>Real-time</strong> expert support</span>
             <span class="overview-item"><strong>Interactive</strong> learning format</span>
           </div>
@@ -22,20 +22,21 @@
     <div class="row g-4 justify-content-start">
       {% for live_class in live_schedules %}
       <div class="col-lg-4 col-md-6 d-flex">
-        <article class="live-class-card home-live-card h-100 d-flex flex-column"
+        <article class="live-class-card home-live-card course-card-link h-100 d-flex flex-column"
                  data-start="{{ live_class.start_time|date:'c' }}"
                  data-end="{{ live_class.end_time|date:'c' }}"
                  data-course-end="{{ live_class.end_date|date:'c' }}"
                  data-meeting="{{ live_class.meeting_link|default:'' }}"
                  data-course-url="{% url 'course_detail' live_class.course.id %}"
-                 data-enrolled="{% if live_class.course.id in user_enrollments %}1{% else %}0{% endif %}">
+                 data-enrolled="{% if live_class.course.id in user_enrollments %}1{% else %}0{% endif %}"
+                 role="link" tabindex="0" aria-label="View {{ live_class.course.course_name }} course details">
           <div class="card-image">
             {% if live_class.course.course_image %}
             <img src="{{ live_class.course.course_image.url }}" alt="{{ live_class.course.course_name }}" class="img-fluid" />
             {% else %}
             <div class="image-fallback">Live session preview</div>
             {% endif %}
-            <span class="live-badge">Live Now</span>
+            <span class="live-badge">{% if home_live_is_fallback %}Popular{% else %}Live Now{% endif %}</span>
           </div>
 
           <div class="card-body flex-grow-1 d-flex flex-column">
@@ -85,7 +86,9 @@
     <div class="row g-4 justify-content-start">
       {% for schedule in pending_schedules %}
       <div class="col-lg-4 col-md-6 d-flex">
-        <article class="live-class-card h-100 d-flex flex-column">
+        <article class="live-class-card course-card-link h-100 d-flex flex-column"
+                 data-course-url="{% url 'course_detail' schedule.course.id %}"
+                 role="link" tabindex="0" aria-label="View {{ schedule.course.course_name }} course details">
           <div class="card-image">
             {% if schedule.course.course_image %}
             <img src="{{ schedule.course.course_image.url }}" alt="{{ schedule.course.course_name }}" class="img-fluid" />

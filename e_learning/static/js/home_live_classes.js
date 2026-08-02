@@ -63,6 +63,18 @@ function updateHomeLiveCTAs(){
 }
 
 document.addEventListener('DOMContentLoaded', function(){
+    document.querySelectorAll('.course-card-link[data-course-url]').forEach(card => {
+        const openCourse = () => window.location.href = card.dataset.courseUrl;
+        card.addEventListener('click', function(event) {
+            if (!event.target.closest('a, button')) openCourse();
+        });
+        card.addEventListener('keydown', function(event) {
+            if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                openCourse();
+            }
+        });
+    });
     updateHomeLiveCTAs();
     setInterval(updateHomeLiveCTAs, 1000);
 });
