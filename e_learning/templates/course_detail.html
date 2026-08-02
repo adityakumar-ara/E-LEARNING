@@ -1,5 +1,10 @@
 {% extends 'main.html' %}
 
+{% block banner_tag %}Course Detail{% endblock %}
+{% block banner_title %}{{ course.course_name }}{% endblock %}
+{% block banner_subtitle %}Everything you need to know about this course, including live and upcoming sessions.{% endblock %}
+{% block banner_section %}Course Detail{% endblock %}
+
 {% block extra_css %}
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 {% endblock %}

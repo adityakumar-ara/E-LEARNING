@@ -1,7 +1,7 @@
 {% extends 'main.html' %} {% load static %} {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/home.css' %}" />
 <link rel="stylesheet" href="{% static 'css/live_classes.css' %}" />
-{% endblock %} {% block content %}
+{% endblock %} {% block banner_tag %}Home{% endblock %} {% block banner_title %}Welcome Back to E-Learning{% endblock %} {% block banner_subtitle %}Find live sessions, featured courses, and the latest learning paths in one place.{% endblock %} {% block banner_section %}Home{% endblock %} {% block content %}
 <div class="hero-section rounded-3">
   {% if videos.first and videos.first.video %}
   <video playsinline autoplay muted loop class="hero-video">
@@ -191,4 +191,8 @@
     </div>
   </div>
   {% include 'upcoming_live_classes.html' %}
-  {% endblock content %}
+{% endblock content %}
+
+{% block extra_js %}
+<script src="{% static 'js/home_live_classes.js' %}"></script>
+{% endblock extra_js %}

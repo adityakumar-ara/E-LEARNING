@@ -1,65 +1,124 @@
 // Enable client-side toggle so Join appears exactly at class start time
-function updateLiveCTAs(){
-    const cards = document.querySelectorAll('.live-now-card, .upcoming-class-card');
-    const now = new Date();
-    cards.forEach(card => {
-        const start = new Date(card.getAttribute('data-start'));
-        const end = new Date(card.getAttribute('data-end'));
-        const meeting = card.getAttribute('data-meeting');
-        const enrolled = card.getAttribute('data-enrolled') === '1';
-        const cta = card.querySelector('.cta-btn');
-        if(!cta) return;
+function parseIsoDate(value){
+    if(!value) return null;
+    const parsed = new Date(value);
+    if(!isNaN(parsed.getTime())) return parsed;
 
-        if(now >= start && now <= end){
-            // class is live
-            if(meeting && enrolled){
-                // make CTA a join link
-                cta.classList.remove('btn-secondary');
-                cta.classList.remove('btn-outline-primary');
-                cta.classList.add('btn-primary');
-                if(cta.tagName.toLowerCase() !== 'a'){
-                    const link = document.createElement('a');
-                    link.className = cta.className + ' w-100 cta-btn';
-                    link.href = meeting;
-                    link.target = '_blank';
-                    link.innerHTML = '<i class="bi bi-camera-video-fill me-2"></i> Join Now';
-                    cta.replaceWith(link);
-                } else {
-                    cta.href = meeting;
-                    cta.target = '_blank';
-                    cta.innerHTML = '<i class="bi bi-camera-video-fill me-2"></i> Join Now';
-                }
+    const match = value.match(/(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})([+-]\d{2}):(\d{2})/);
+    if(!match) return null;
+
+    const [_, year, month, day, hour, minute, second, tzSign, tzOffset] = match;
+    const offsetMinutes = parseInt(tzOffset, 10);
+    const offset = offsetMinutes * (tzSign === '+' ? 1 : -1);
+    const utc = Date.UTC(year, month - 1, day, hour, minute, second);
+    return new Date(utc - offset * 60000);
+}
+
+function updateLiveCTAs(){
+    const now = new Date();
+    const liveRow = document.getElementById('live-now-list');
+    const upcomingRow = document.getElementById('upcoming-list');
+    const liveCount = document.getElementById('live-count');
+    const upcomingCount = document.getElementById('upcoming-count');
+
+    const cards = document.querySelectorAll('.live-now-card, .upcoming-class-card');
+    cards.forEach(card => {
+        const start = parseIsoDate(card.dataset.start);
+        const end = parseIsoDate(card.dataset.end);
+        const meeting = card.dataset.meeting;
+        const courseUrl = card.dataset.courseUrl || '#';
+        const enrolled = card.dataset.enrolled === '1';
+        const cta = card.querySelector('.cta-btn');
+        if(!cta || !start || !end) return;
+
+        const wrapper = card.closest('[data-card-container]');
+        const isLive = now.getTime() >= start.getTime() && now.getTime() <= end.getTime();
+        const isUpcoming = now.getTime() < start.getTime();
+        const isEnded = now.getTime() > end.getTime();
+
+        if(isEnded && wrapper){
+            wrapper.remove();
+            return;
+        }
+
+        if(isLive && upcomingRow && liveRow && wrapper && upcomingRow.contains(wrapper)){
+            liveRow.appendChild(wrapper);
+        } else if(isUpcoming && upcomingRow && liveRow && wrapper && liveRow.contains(wrapper)){
+            upcomingRow.appendChild(wrapper);
+        }
+
+        if(isLive){
+            if(enrolled && meeting){
+                makeJoinButton(cta, meeting);
             } else if(!enrolled){
-                // show enroll prompt
-                if(cta.tagName.toLowerCase() === 'a'){
-                    cta.href = cta.getAttribute('href') || cta.href;
-                }
-                cta.classList.remove('btn-secondary');
-                cta.classList.remove('btn-outline-primary');
-                cta.classList.add('btn-outline-primary');
-                cta.innerText = 'Enroll to Join';
-            }
-        } else {
-            // not live yet
-            if(cta.tagName.toLowerCase() === 'a' && cta.classList.contains('btn-primary')){
-                // replace with disabled wait button
-                const btn = document.createElement('button');
-                btn.className = 'btn btn-secondary w-100 cta-btn';
-                btn.disabled = true;
-                btn.innerText = 'Wait';
-                cta.replaceWith(btn);
+                makeEnrollButton(cta, courseUrl);
             } else {
-                // ensure disabled wait shown
-                cta.className = 'btn btn-secondary w-100 cta-btn';
-                cta.disabled = true;
-                cta.innerText = 'Wait';
+                setButtonState(cta, 'waiting');
             }
+        } else if(isUpcoming){
+            setButtonState(cta, 'waiting');
+        } else if(isEnded){
+            setButtonState(cta, 'ended');
         }
     });
+
+    if(liveCount) liveCount.textContent = document.querySelectorAll('#live-now-list [data-card-container]').length;
+    if(upcomingCount) upcomingCount.textContent = document.querySelectorAll('#upcoming-list [data-card-container]').length;
+}
+
+function makeJoinButton(cta, meeting){
+    if(cta.tagName.toLowerCase() !== 'a'){
+        const link = document.createElement('a');
+        link.className = 'btn btn-primary w-100 cta-btn';
+        link.href = meeting;
+        link.target = '_blank';
+        link.innerHTML = '<i class="bi bi-camera-video-fill me-2"></i> Join Now';
+        cta.replaceWith(link);
+    } else {
+        cta.className = 'btn btn-primary w-100 cta-btn';
+        cta.href = meeting;
+        cta.target = '_blank';
+        cta.innerHTML = '<i class="bi bi-camera-video-fill me-2"></i> Join Now';
+    }
+}
+
+function makeEnrollButton(cta, courseUrl){
+    if(cta.tagName.toLowerCase() !== 'a'){
+        const link = document.createElement('a');
+        link.className = 'btn btn-primary w-100 cta-btn';
+        link.href = courseUrl;
+        link.innerHTML = '<i class="bi bi-journal-plus me-2"></i> Enroll to Join';
+        cta.replaceWith(link);
+    } else {
+        cta.className = 'btn btn-primary w-100 cta-btn';
+        cta.href = courseUrl;
+        cta.innerHTML = '<i class="bi bi-journal-plus me-2"></i> Enroll to Join';
+    }
+}
+
+function setButtonState(cta, state){
+    const tag = cta.tagName.toLowerCase();
+    const text = {
+        coming_soon: 'Coming Soon',
+        enroll: 'Enroll to Join',
+        waiting: 'Wait',
+        ended: 'Session Ended'
+    }[state] || 'Wait';
+
+    if(tag === 'a'){
+        const btn = document.createElement('button');
+        btn.className = 'btn btn-secondary w-100 cta-btn';
+        btn.disabled = true;
+        btn.innerText = text;
+        cta.replaceWith(btn);
+    } else {
+        cta.className = 'btn btn-secondary w-100 cta-btn';
+        cta.disabled = true;
+        cta.innerText = text;
+    }
 }
 
 document.addEventListener('DOMContentLoaded', function(){
     updateLiveCTAs();
-    // check every 10 seconds
-    setInterval(updateLiveCTAs, 10000);
+    setInterval(updateLiveCTAs, 1000);
 });

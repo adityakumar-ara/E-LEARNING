@@ -1,17 +1,17 @@
 <div class="upcoming-live-section py-5">
   <div class="container">
     <div class="section-header text-center mb-5">
-      <p class="section-label">Upcoming Live Classes</p>
-      <h1 class="section-title">Learn live with expert instructors</h1>
-      <p class="section-copy mx-auto">Reserve your seat now for interactive sessions that help you learn faster, ask questions in real time, and connect with the right course.</p>
+      <p class="section-label">Live Classes</p>
+      <h1 class="section-title">Join classes that are live right now</h1>
+      <p class="section-copy mx-auto">Open sessions are running now. Jump in and learn with instructors in real time.</p>
     </div>
 
     <div class="row justify-content-center mb-4">
       <div class="col-lg-10">
         <div class="overview-panel d-flex flex-column flex-md-row align-items-center justify-content-between gap-3 p-4 rounded-4">
-          <span class="overview-pill">Live sessions every week</span>
+          <span class="overview-pill">Live sessions in progress</span>
           <div class="overview-items d-flex flex-wrap gap-3 text-center text-sm-start">
-            <span class="overview-item"><strong>{{ upcoming_classes|length }}</strong> upcoming classes</span>
+            <span class="overview-item"><strong>{{ live_schedules|length }}</strong> classes live now</span>
             <span class="overview-item"><strong>Real-time</strong> expert support</span>
             <span class="overview-item"><strong>Interactive</strong> learning format</span>
           </div>
@@ -20,38 +20,96 @@
     </div>
 
     <div class="row g-4 justify-content-start">
-      {% for live_class in upcoming_classes %}
+      {% for live_class in live_schedules %}
       <div class="col-lg-4 col-md-6 d-flex">
-        <article class="live-class-card h-100 d-flex flex-column">
+        <article class="live-class-card home-live-card h-100 d-flex flex-column"
+                 data-start="{{ live_class.start_time|date:'c' }}"
+                 data-end="{{ live_class.end_time|date:'c' }}"
+                 data-course-end="{{ live_class.end_date|date:'c' }}"
+                 data-meeting="{{ live_class.meeting_link|default:'' }}"
+                 data-course-url="{% url 'course_detail' live_class.course.id %}"
+                 data-enrolled="{% if live_class.course.id in user_enrollments %}1{% else %}0{% endif %}">
           <div class="card-image">
             {% if live_class.course.course_image %}
             <img src="{{ live_class.course.course_image.url }}" alt="{{ live_class.course.course_name }}" class="img-fluid" />
             {% else %}
             <div class="image-fallback">Live session preview</div>
             {% endif %}
-            <span class="live-badge">Upcoming</span>
+            <span class="live-badge">Live Now</span>
           </div>
 
           <div class="card-body flex-grow-1 d-flex flex-column">
             <p class="course-label">{{ live_class.course.course_name }}</p>
             <h3 class="class-title">{{ live_class.title }}</h3>
+            <span class="badge bg-info text-dark home-live-session-badge mb-3">Course active this month</span>
 
             <div class="live-meta">
               <span><i class="bi bi-calendar-event"></i> {{ live_class.start_time|date:"M d, Y" }}</span>
-              <span><i class="bi bi-clock"></i> {{ live_class.start_time|time:"h:i A" }}</span>
+              <span><i class="bi bi-clock"></i> {{ live_class.start_time|time:"h:i A" }} - {{ live_class.end_time|time:"h:i A" }}</span>
             </div>
 
             <p class="class-description">Join this session to get live guidance from instructors, clarify your doubts, and practice course skills with classmates.</p>
           </div>
 
           <div class="card-footer mt-auto">
-            <a href="{% url 'course_detail' live_class.course.id %}" class="join-btn">View Course</a>
+            <button class="btn btn-secondary w-100 home-live-cta-btn" disabled>
+              <i class="bi bi-hourglass-split me-2"></i>
+              <span class="home-live-cta-text">Wait</span>
+              <span class="home-live-countdown small ms-2"></span>
+            </button>
           </div>
         </article>
       </div>
       {% empty %}
       <div class="col-12">
-        <div class="empty-state">No live classes are scheduled right now. Please check back soon.</div>
+        <div class="empty-state">No live classes are running right now. Please check back later or browse featured courses.</div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <div class="row mt-5">
+      <div class="col-12">
+        <div class="section-header text-center mb-4">
+          <p class="section-label">Upcoming Schedule</p>
+          <h2 class="section-title">Classes with pending schedules</h2>
+          <p class="section-copy mx-auto">These classes are scheduled but not yet completed according to their date and time.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="row g-4 justify-content-start">
+      {% for schedule in pending_schedules %}
+      <div class="col-lg-4 col-md-6 d-flex">
+        <article class="live-class-card h-100 d-flex flex-column">
+          <div class="card-image">
+            {% if schedule.course.course_image %}
+            <img src="{{ schedule.course.course_image.url }}" alt="{{ schedule.course.course_name }}" class="img-fluid" />
+            {% else %}
+            <div class="image-fallback">Scheduled session preview</div>
+            {% endif %}
+            <span class="live-badge upcoming">Upcoming</span>
+          </div>
+
+          <div class="card-body flex-grow-1 d-flex flex-column">
+            <p class="course-label">{{ schedule.course.course_name }}</p>
+            <h3 class="class-title">{{ schedule.title }}</h3>
+
+            <div class="live-meta">
+              <span><i class="bi bi-calendar-event"></i> {{ schedule.start_time|date:"M d, Y" }}</span>
+              <span><i class="bi bi-clock"></i> {{ schedule.start_time|time:"h:i A" }} - {{ schedule.end_time|time:"h:i A" }}</span>
+            </div>
+
+            <p class="class-description">This session has not completed its scheduled time window and is still pending.</p>
+          </div>
+
+          <div class="card-footer mt-auto">
+            <a href="{% url 'course_detail' schedule.course.id %}" class="join-btn">View Course</a>
+          </div>
+        </article>
+      </div>
+      {% empty %}
+      <div class="col-12">
+        <div class="empty-state">No pending scheduled classes at the moment.</div>
       </div>
       {% endfor %}
     </div>

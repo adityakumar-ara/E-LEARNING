@@ -5,6 +5,11 @@
 <link rel="stylesheet" href="{% static 'css/live_classes.css' %}">
 {% endblock %}
 
+{% block banner_tag %}Live Classes{% endblock %}
+{% block banner_title %}Join Live Sessions Now{% endblock %}
+{% block banner_subtitle %}Watch active classes and reserve your seat for upcoming instructor-led sessions.{% endblock %}
+{% block banner_section %}Live Classes{% endblock %}
+
 {% block content %}
 <div class="live-hero py-5">
     <div class="container">
@@ -32,13 +37,13 @@
                     <div class="row gx-3 gy-3">
                         <div class="col-6">
                             <div class="summary-stat text-center p-3 rounded-3">
-                                <span class="d-block fs-4 fw-bold text-primary">{{ live_classes|length }}</span>
+                                <span class="d-block fs-4 fw-bold text-primary" id="live-count">{{ live_classes|length }}</span>
                                 <small class="text-muted">Live Now</small>
                             </div>
                         </div>
                         <div class="col-6">
                             <div class="summary-stat text-center p-3 rounded-3">
-                                <span class="d-block fs-4 fw-bold text-primary">{{ upcoming_classes|length }}</span>
+                                <span class="d-block fs-4 fw-bold text-primary" id="upcoming-count">{{ upcoming_classes|length }}</span>
                                 <small class="text-muted">Upcoming</small>
                             </div>
                         </div>
@@ -50,23 +55,23 @@
 </div>
 
 <div class="container py-5">
-    <!-- Live Now Section -->
     <section class="mb-6">
         <div class="section-header mb-5">
             <div>
-                <h2>🔴 Live Now</h2>
-                <p class="text-muted mb-0">Join active sessions and continue your learning journey in real time</p>
+                <h2>📚 All Sessions</h2>
+                <p class="text-muted mb-0">Browse every class schedule and see the current status for each session.</p>
             </div>
         </div>
 
-        {% if live_classes %}
-        <div class="row g-4">
-            {% for schedule in live_classes %}
-            <div class="col-lg-6">
+        {% if all_schedules %}
+        <div class="row g-4" id="all-classes-list">
+            {% for schedule in all_schedules %}
+            <div class="col-lg-6" data-card-container>
                 <div class="live-now-card" data-start="{{ schedule.start_time|date:'c' }}"
                     data-end="{{ schedule.end_time|date:'c' }}" data-meeting="{{ schedule.meeting_link|default:'' }}"
-                    data-enrolled="{% if schedule.course.id in user_enrollments %}1{% else %}0{% endif %}">
-                    
+                    data-course-url="{% url 'course_detail' schedule.course.id %}"
+                    data-enrolled="{% if schedule.is_enrolled %}1{% else %}0{% endif %}">
+
                     {% if schedule.course.course_image %}
                     <div class="class-card-media">
                         <img src="{{ schedule.course.course_image.url }}" alt="{{ schedule.course.course_name }} image">
@@ -85,7 +90,7 @@
                             <div class="flex-grow-1 pe-3">
                                 <div class="d-flex align-items-center gap-2 mb-2">
                                     <h5 class="card-title fw-bold mb-0">{{ schedule.title }}</h5>
-                                    <span class="live-badge">Live</span>
+                                    <span class="live-badge">{{ schedule.current_status|capfirst }}</span>
                                 </div>
                                 <p class="card-subtitle text-muted small mb-0">
                                     <i class="bi bi-book me-1"></i>{{ schedule.course.course_name }}
@@ -109,96 +114,23 @@
                         </div>
 
                         <div class="mt-auto">
-                            <!-- The button is now controlled by live_classes.js -->
-                            <button class="btn btn-secondary w-100 cta-btn" disabled>
-                                <i class="bi bi-hourglass-split me-2"></i>Wait
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            {% endfor %}
-        </div>
-        {% else %}
-        <div class="empty-state">
-            <i class="bi bi-broadcast"></i>
-            <p class="fs-5 mb-0">No live classes at the moment</p>
-            <small class="text-muted">Check the upcoming classes section below to join an upcoming session</small>
-        </div>
-        {% endif %}
-    </section>
-
-    <!-- Upcoming Classes Section -->
-    <section class="py-5 border-top">
-        <div class="section-header mb-5">
-            <div>
-                <h2>📅 Upcoming Classes</h2>
-                <p class="text-muted mb-0">Discover and reserve your spot for upcoming interactive sessions</p>
-            </div>
-            {% if upcoming_classes %}
-            <div class="ms-auto">
-                <span class="badge bg-primary text-white py-2 px-3">
-                    <i class="bi bi-calendar-check me-1"></i>{{ upcoming_classes|length }} classes scheduled
-                </span>
-            </div>
-            {% endif %}
-        </div>
-
-        {% if upcoming_classes %}
-        <div class="row g-4">
-            {% for schedule in upcoming_classes %}
-            <div class="col-lg-4 col-md-6">
-                <div class="upcoming-class-card" data-start="{{ schedule.start_time|date:'c' }}" 
-                    data-end="{{ schedule.end_time|date:'c' }}"
-                    data-meeting="{{ schedule.meeting_link|default:'' }}"
-                    data-enrolled="{% if schedule.course.id in user_enrollments %}1{% else %}0{% endif %}">
-                    
-                    {% if schedule.course.course_image %}
-                    <div class="class-card-media">
-                        <img src="{{ schedule.course.course_image.url }}" alt="{{ schedule.course.course_name }} image">
-                    </div>
-                    {% else %}
-                    <div class="class-card-media d-flex align-items-center justify-content-center">
-                        <div class="text-center text-muted">
-                            <i class="bi bi-image fs-1 mb-2"></i>
-                            <p class="mb-0">No image</p>
-                        </div>
-                    </div>
-                    {% endif %}
-
-                    <div class="card-body d-flex flex-column">
-                        <div class="d-flex justify-content-between align-items-start mb-3 gap-2">
-                            <div class="flex-grow-1">
-                                <h5 class="fw-bold mb-1">{{ schedule.title }}</h5>
-                                <p class="text-muted small mb-2">{{ schedule.course.course_name }}</p>
-                            </div>
-                            <span class="upcoming-badge" style="white-space: nowrap;">Upcoming</span>
-                        </div>
-
-                        <div class="mb-3">
-                            <div class="class-info mb-2">
-                                <i class="bi bi-calendar2-event"></i>
-                                <span>{{ schedule.start_time|date:"D, M j, Y" }}</span>
-                            </div>
-                            <div class="class-info">
-                                <i class="bi bi-clock"></i>
-                                <span>{{ schedule.start_time|time:"g:i A" }} - {{ schedule.end_time|time:"g:i A" }}</span>
-                            </div>
-                        </div>
-
-                        <p class="text-muted small mb-4 flex-grow-1">
-                            Learn directly from instructors and enhance your skills in an interactive environment.
-                        </p>
-
-                        <div class="mt-auto d-grid gap-2">
-                            <a href="{% url 'course_detail' schedule.course.id %}"
-                                class="btn btn-outline-primary btn-sm">
-                                <i class="bi bi-eye me-1"></i>View Course Details
-                            </a>
-                            <!-- This button is now controlled by live_classes.js -->
-                            <button class="btn btn-secondary btn-sm cta-btn" disabled>
-                                <i class="bi bi-hourglass-split me-1"></i>Coming Soon
-                            </button>
+                            {% if schedule.current_status == 'join' and schedule.meeting_link %}
+                                <a href="{{ schedule.meeting_link }}" target="_blank" class="btn btn-primary w-100 cta-btn">
+                                    <i class="bi bi-camera-video-fill me-2"></i> Join Now
+                                </a>
+                            {% elif schedule.current_status == 'enroll' %}
+                                <a href="{% url 'course_detail' schedule.course.id %}" class="btn btn-primary w-100 cta-btn">
+                                    <i class="bi bi-journal-plus me-2"></i> Enroll to Join
+                                </a>
+                            {% elif schedule.current_status == 'ended' %}
+                                <button class="btn btn-secondary w-100 cta-btn" disabled>
+                                    <i class="bi bi-x-circle me-2"></i> Session Ended
+                                </button>
+                            {% else %}
+                                <button class="btn btn-secondary w-100 cta-btn" disabled>
+                                    <i class="bi bi-hourglass-split me-2"></i> Wait
+                                </button>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
@@ -208,8 +140,8 @@
         {% else %}
         <div class="empty-state">
             <i class="bi bi-calendar-x"></i>
-            <p class="fs-5 mb-0">No upcoming classes scheduled</p>
-            <small class="text-muted">New classes will be available soon. Check back later!</small>
+            <p class="fs-5 mb-0">No classes available right now</p>
+            <small class="text-muted">Please check back later or browse featured courses.</small>
         </div>
         {% endif %}
     </section>

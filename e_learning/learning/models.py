@@ -85,9 +85,10 @@ class ClassSchedule(models.Model):
     def is_live(self):
         """Returns True if the class is currently live."""
         from django.utils import timezone
-        today = timezone.now().date()
+        local_now = timezone.localtime(timezone.now())
+        today = local_now.date()
         if not (self.start_date <= today <= self.end_date):
             return False
         
-        current_time = timezone.localtime(timezone.now()).time()
+        current_time = local_now.time()
         return self.start_time_of_day <= current_time <= self.end_time_of_day
