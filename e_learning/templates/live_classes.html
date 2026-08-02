@@ -121,14 +121,14 @@
                         </div>
 
                             <div class="mt-auto">
-                            {% if schedule.activity_status == 'live' %}
-                                {% if schedule.is_enrolled and schedule.meeting_link %}
+                            {% if not schedule.is_enrolled %}
+                                <a href="{% url 'course_detail' schedule.course.id %}" class="btn btn-primary w-100 cta-btn">
+                                    <i class="bi bi-journal-plus me-2"></i> Enroll Now
+                                </a>
+                            {% elif schedule.activity_status == 'live' %}
+                                {% if schedule.meeting_link %}
                                     <a href="{{ schedule.meeting_link }}" target="_blank" class="btn btn-primary w-100 cta-btn">
                                         <i class="bi bi-camera-video-fill me-2"></i> Join Now
-                                    </a>
-                                {% elif not schedule.is_enrolled %}
-                                    <a href="{% url 'course_detail' schedule.course.id %}" class="btn btn-primary w-100 cta-btn">
-                                        <i class="bi bi-journal-plus me-2"></i> Enroll to Join
                                     </a>
                                 {% else %}
                                     <button class="btn btn-secondary w-100 cta-btn" disabled>
@@ -136,15 +136,9 @@
                                     </button>
                                 {% endif %}
                             {% elif schedule.activity_status == 'upcoming' %}
-                                {% if schedule.is_enrolled %}
-                                    <button class="btn btn-secondary w-100 cta-btn" disabled>
-                                        <i class="bi bi-hourglass-split me-2"></i> Wait
-                                    </button>
-                                {% else %}
-                                    <a href="{% url 'course_detail' schedule.course.id %}" class="btn btn-primary w-100 cta-btn">
-                                        <i class="bi bi-journal-plus me-2"></i> Enroll to Join
-                                    </a>
-                                {% endif %}
+                                <button class="btn btn-secondary w-100 cta-btn" disabled>
+                                    <i class="bi bi-hourglass-split me-2"></i> Wait
+                                </button>
                             {% else %}
                                 <button class="btn btn-secondary w-100 cta-btn" disabled>
                                     <i class="bi bi-x-circle me-2"></i> Session Ended
