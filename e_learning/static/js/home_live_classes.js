@@ -10,6 +10,9 @@ function updateHomeLiveCTAs(){
         const ctaText = card.querySelector('.home-live-cta-text');
         const countdown = card.querySelector('.home-live-countdown');
 
+        // An unenrolled visitor must always see the Enroll Now link.
+        if (!enrolled) return;
+
         if(!cta || !ctaText || !countdown) return;
 
         const isToday = now.toDateString() === start.toDateString();
