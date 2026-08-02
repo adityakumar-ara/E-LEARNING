@@ -107,7 +107,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Kolkata'  # India Standard Time (UTC+5:30)
 
 USE_I18N = True
 
@@ -125,14 +125,15 @@ MEDIA_ROOT = BASE_DIR/'media/'
 # Custom User Model
 AUTH_USER_MODEL = 'learning.CustomeUser'
 
-# Email Configuration (for development)
-# This will print emails to the console where you run `manage.py runserver`.
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+# Email Configuration - Gmail SMTP
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'adityakumarofficial335@gmail.com'  # Fixed typo: gamil.com -> gmail.com
+EMAIL_HOST_PASSWORD = 'cqfqcyzycwpijwbr'
+DEFAULT_FROM_EMAIL = 'adityakumarofficial335@gmail.com'
 
-# For production, you would use a real email service like this:
-# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-# EMAIL_HOST = 'smtp.gmail.com'
-# EMAIL_PORT = 587
-# EMAIL_USE_TLS = True
-# EMAIL_HOST_USER = 'your-email@gmail.com'
-# EMAIL_HOST_PASSWORD = 'your-app-password' # Use an App Password for security
+# Razorpay test keys for enrollment payments
+RAZORPAY_KEY_ID = 'rzp_test_T7vUcjTg0kuDOn'
+RAZORPAY_KEY_SECRET = 'FAs1T30tm7oCZ2nOUYjKg7Ug'
