@@ -1,0 +1,1 @@
+Don`t add and delete  extra thing , if need to write css code  and js then create a static folder in static folder create css and js name folder and css code write in css folder and js code write in js folder , and alwas mantain codel code make like premium design.
